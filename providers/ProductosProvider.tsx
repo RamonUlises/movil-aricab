@@ -1,0 +1,79 @@
+import io from "socket.io-client";
+import { server } from "../lib/server";
+import { createContext, useContext, useEffect, useState } from "react";
+import { ProductoType } from "../types/productos";
+import { ActivityIndicator, View } from "react-native";
+import { useAuth } from "./AuthProvider";
+import { RutasProductosType } from "../types/rutasProductos";
+
+const socket = io(server.url);
+
+const ProductosContext = createContext({
+  productos: [] as ProductoType[],
+});
+
+export default function ProductosProvider({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  const [productos, setProductos] = useState([] as ProductoType[]);
+  const [loading, setLoading] = useState(true);
+
+  const { token } = useAuth();
+
+  const fetchProductos = async () => {
+    try {
+      setProductos([]);
+
+      const response = await fetch(`${server.url}/rutas/${token}/productos`, {
+        headers: {
+          Authorization: `Basic ${server.credetials}`,
+        },
+      });
+      const data: RutasProductosType = await response.json();
+
+      if (response.status > 400) {
+        setProductos([]);
+        setLoading(false);
+
+        return;
+      }
+
+      setProductos(data.productos);
+      setLoading(false);
+    } catch {
+      setProductos([]);
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    socket.on("updateProd", async () => {
+      setProductos([]);
+      fetchProductos();
+    });
+
+    fetchProductos();
+
+    return () => {
+      socket.off("updateProd");
+    };
+  }, []);
+
+  if (loading) {
+    return (
+      <View className="bg-slate-200 w-full h-full justify-center items-center">
+        <ActivityIndicator size="large" />
+      </View>
+    );
+  }
+
+  return (
+    <ProductosContext.Provider value={{ productos }}>
+      {children}
+    </ProductosContext.Provider>
+  );
+}
+
+export const useProductos = () => useContext(ProductosContext);

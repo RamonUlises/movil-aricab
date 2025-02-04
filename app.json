@@ -1,8 +1,9 @@
 {
   "expo": {
-    "name": "facturation-movil-aricab",
-    "slug": "facturation-movil-aricab",
-    "version": "1.0.0",
+    "scheme": "aricab-facturation",
+    "name": "Ari-Cab Facturation",
+    "slug": "aricab-facturation",
+    "version": "1.1.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
@@ -13,16 +14,37 @@
       "backgroundColor": "#ffffff"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.anonymous.aricabfacturation"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
-      }
+        "backgroundColor": "#27272b"
+      },
+      "package": "com.anonymous.aricabfacturation",
+      "permissions": [
+        "android.permission.BLUETOOTH",
+        "android.permission.BLUETOOTH_ADMIN",
+        "android.permission.BLUETOOTH_CONNECT",
+        "android.permission.ACCESS_FINE_LOCATION"
+      ]
     },
     "web": {
-      "favicon": "./assets/favicon.png"
-    }
+      "favicon": "./assets/favicon.png",
+      "bundler": "metro"
+    },
+    "plugins": [
+      "expo-router"
+    ],
+    "extra": {
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "8bf845ea-5235-49b1-830d-a0d39d70885b"
+      }
+    },
+    "owner": "ramon.hernandez"
   }
 }
