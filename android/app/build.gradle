@@ -151,10 +151,7 @@ dependencies {
     // Add explicit AndroidX Media dependency
     implementation "androidx.media:media:1.6.0"
     // The version of react-native is set by the React Native Gradle Plugin
-    implementation(project(':react-native-bluetooth-escpos-printer')) {
-        exclude group: 'com.android.support', module: 'support-compat'
-        exclude group: 'com.android.support', module: 'support-media-compat'
-    }
+    implementation project(':react-native-bluetooth-escpos-printer')
     
     implementation("com.facebook.react:react-android")
 
