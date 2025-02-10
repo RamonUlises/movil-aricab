@@ -18,13 +18,15 @@
     "expo-print": "~14.0.3",
     "expo-router": "~4.0.16",
     "expo-sharing": "~13.0.1",
+    "expo-splash-screen": "~0.29.21",
     "expo-status-bar": "~2.0.1",
+    "expo-system-ui": "~4.0.7",
     "html-to-image": "^1.11.11",
     "nativewind": "^2.0.11",
     "react": "18.3.1",
     "react-native": "0.76.6",
     "react-native-bluetooth-classic": "^1.73.0-rc.12",
-    "react-native-bluetooth-escpos-printer": "github:RamonUlises/react-native-bluetooth-escpos-printer-expo",
+    "react-native-bluetooth-escpos-printer": "github:RamonUlises/react-native-bluetooth-escpos-printer",
     "react-native-gesture-handler": "~2.20.2",
     "react-native-pager-view": "6.5.1",
     "react-native-pdf": "^6.7.6",
@@ -34,8 +36,7 @@
     "react-native-screens": "~4.4.0",
     "react-native-tab-view": "^4.0.5",
     "react-native-uuid": "^2.0.3",
-    "socket.io-client": "^4.8.1",
-    "expo-system-ui": "~4.0.7"
+    "socket.io-client": "^4.8.1"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",

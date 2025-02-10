@@ -83,7 +83,8 @@ export default function AuthProvider ({ children }: { children: React.ReactNode}
       setIsAuthenticated(true);
       setToken(token);
       setUsuario(usuarioo);
-    } catch {
+    } catch(error) {
+      console.error(error);
      setLoading(false);
     }
   };

@@ -15,7 +15,11 @@ export const Login = ({
   const [password, setPassword] = useState("");
 
   const handleLogin = async () => {
-    await login(username, password);
+    try{
+      await login(username, password);
+    } catch (error) {
+      console.error(error)
+    }
   };
 
   return (
@@ -37,10 +41,13 @@ export const Login = ({
         onChangeText={setPassword}
         secureTextEntry
         value={password}
+        onBlur={async () => {
+          await handleLogin()
+        }}
         className="mt-4 mb-16 border-b-2 border-black mx-8 text-black"
       />
 
-      <Pressable className="w-full" onPress={handleLogin}>
+      <Pressable className="w-full" onPress={async () => await handleLogin()}>
         <Text className="text-center text-lg font-semibold text-green-600">
           Login
         </Text>

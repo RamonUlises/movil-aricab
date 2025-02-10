@@ -23,9 +23,9 @@ class MainApplication : Application(), ReactApplication {
         this,
         object : DefaultReactNativeHost(this) {
           override fun getPackages(): List<ReactPackage> {
-            return PackageList(this).packages + listOf(
-        cn.jystudio.bluetooth.RNBluetoothEscposPrinterPackage() // <-- Agrega la librería aquí
-    )
+            // Packages that cannot be autolinked yet can be added manually here, for example:
+            // packages.add(new MyReactNativePackage());
+            return PackageList(this).packages
           }
 
           override fun getJSMainModuleName(): String = ".expo/.virtual-metro-entry"

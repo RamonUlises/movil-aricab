@@ -3,9 +3,6 @@ import ProductosProvider from "./ProductosProvider";
 import ClientesProvider from "./ClientesProvider";
 import FacturasProvider from "./FacturasProvider";
 import { DevicesProvider } from "./BluetoothDevices";
-import { enableScreens } from 'react-native-screens';
-
-enableScreens(false);
 
 export function Provider({ children }: { children: React.ReactNode }) {
   return (

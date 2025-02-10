@@ -15,9 +15,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "13B07F861A680F5B00A75B9A"
-               BuildableName = "aricabfacturation.app"
-               BlueprintName = "aricabfacturation"
-               ReferencedContainer = "container:aricabfacturation.xcodeproj">
+               BuildableName = "AriCabFacturation.app"
+               BlueprintName = "AriCabFacturation"
+               ReferencedContainer = "container:AriCabFacturation.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -33,9 +33,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "00E356ED1AD99517003FC87E"
-               BuildableName = "aricabfacturationTests.xctest"
-               BlueprintName = "aricabfacturationTests"
-               ReferencedContainer = "container:aricabfacturation.xcodeproj">
+               BuildableName = "AriCabFacturationTests.xctest"
+               BlueprintName = "AriCabFacturationTests"
+               ReferencedContainer = "container:AriCabFacturation.xcodeproj">
             </BuildableReference>
          </TestableReference>
       </Testables>
@@ -55,9 +55,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "13B07F861A680F5B00A75B9A"
-            BuildableName = "aricabfacturation.app"
-            BlueprintName = "aricabfacturation"
-            ReferencedContainer = "container:aricabfacturation.xcodeproj">
+            BuildableName = "AriCabFacturation.app"
+            BlueprintName = "AriCabFacturation"
+            ReferencedContainer = "container:AriCabFacturation.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </LaunchAction>
@@ -72,9 +72,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "13B07F861A680F5B00A75B9A"
-            BuildableName = "aricabfacturation.app"
-            BlueprintName = "aricabfacturation"
-            ReferencedContainer = "container:aricabfacturation.xcodeproj">
+            BuildableName = "AriCabFacturation.app"
+            BlueprintName = "AriCabFacturation"
+            ReferencedContainer = "container:AriCabFacturation.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </ProfileAction>
