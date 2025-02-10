@@ -1,4 +1,4 @@
-const editing = true;
+const editing = false;
 const produccion = "https://aricab.nextstep-web.online";
 const desarrollo = "http://192.168.1.31:3000";
 
