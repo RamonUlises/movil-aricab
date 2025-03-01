@@ -47,10 +47,15 @@ export default function FacturarId() {
   );
   const [search, setSearch] = useState("");
 
-  const addProd = (id: string, nombre: string, precio: number, cantidadPrd: number) => {
+  const addProd = (
+    id: string,
+    nombre: string,
+    precio: number,
+    cantidadPrd: number
+  ) => {
     if (prodSelected.find((prod) => prod.id === id)) return;
     const canti = cant[id] || 0;
-    if(cantidadPrd + canti === 0) return;
+    if (cantidadPrd + canti === 0) return;
 
     setProdSelected([...prodSelected, { id, nombre, precio, cantidad: 1 }]);
     setTempValues((prev) => ({ ...prev, [id]: "1" }));
@@ -114,7 +119,9 @@ export default function FacturarId() {
     if (text === "") {
       setPrdMost(productos);
     } else {
-      const filtered = buscarProductos(text, productos);
+      const filtered = productos.filter((prd) =>
+        prd.nombre.toLowerCase().includes(text.toLowerCase())
+      );
 
       setPrdMost(filtered);
     }
@@ -132,7 +139,10 @@ export default function FacturarId() {
             if (edit) {
               router.push("/(drawer)/facturas");
             } else {
-              router.push({ pathname: "/facturar", params: { mode: "facturar" } });
+              router.push({
+                pathname: "/facturar",
+                params: { mode: "facturar" },
+              });
             }
           }}
           name="arrow-back-outline"
@@ -218,7 +228,12 @@ export default function FacturarId() {
               ) : (
                 <Pressable
                   onPress={() =>
-                    addProd(producto.id, producto.nombre, producto.precio, producto.cantidad)
+                    addProd(
+                      producto.id,
+                      producto.nombre,
+                      producto.precio,
+                      producto.cantidad
+                    )
                   }
                   className="bg-slate-500 py-1 px-2 rounded-md"
                 >

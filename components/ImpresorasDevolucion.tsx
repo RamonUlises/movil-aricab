@@ -94,7 +94,7 @@ export const ImpresorasDevolucion = ({
       });
       await BluetoothEscposPrinter.printText(`Direccion: ${direccion}\n`, {});
       await BluetoothEscposPrinter.printText(
-        `Fecha: ${new Date(fecha).toLocaleDateString()}\n\n`,
+        `Fecha: ${new Date(fecha).toLocaleDateString()}\n`,
         {
           encoding: "UTF8",
         }

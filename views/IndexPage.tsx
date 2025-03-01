@@ -152,7 +152,7 @@ export const IndexPage = ({ logout }: { logout: () => Promise<void> }) => {
           </Text>
           <Text className="font-medium text-green-600 w-1/2 -ml-2 text-center text-xl rounded-r-xl border-y border-green-600 border-r">
             C${" "}
-            {facturasHoy.reduce((acc, f) => acc + f.total, 0) - devolucionesHoy}
+            {facturasHoy.filter(f => f.tipo === 'contado').reduce((acc, f) => acc + f.total, 0) - devolucionesHoy}
           </Text>
         </View>
 
