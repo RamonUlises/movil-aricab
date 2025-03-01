@@ -1,43 +1,42 @@
-import { ActivityIndicator, Alert, Modal, Pressable, ScrollView, Text, View } from "react-native";
-import { useDevice } from "../providers/BluetoothDevices";
-import { Feather } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
+import { useDevice } from "../providers/BluetoothDevices";
 import { useState } from "react";
-import { PrdSlc } from "../types/productosSeleccionados";
-import { buscarClienteNombre } from "../utils/buscarCliente";
 import { useClientes } from "../providers/ClientesProvider";
+import { buscarClienteNombre } from "../utils/buscarCliente";
 import {
   BluetoothManager,
   BluetoothEscposPrinter,
 } from "react-native-bluetooth-escpos-printer";
+import { Modal, Pressable, ScrollView, View, Text, Alert, ActivityIndicator } from "react-native";
+import { Feather } from "@expo/vector-icons";
+import { ProductosDevolucion } from "../types/devoluciones";
+import { modalVisible } from "./ModalDevolucionInfo";
 
-export function Impresoras({
+export const ImpresorasDevolucion = ({
   visible,
-  id,
   cliente,
-  estado,
-  productos,
+  id,
   fecha,
-  create,
+  productos,
+  total,
+  page,
   setVisible,
-  pagado,
 }: {
   visible: boolean;
-  id: string;
   cliente: string;
-  estado: string;
-  productos: PrdSlc[];
-  fecha: Date;
-  create: boolean;
-  setVisible?: (visible: boolean) => void;
-  pagado: number;
-}) {
+  id: string;
+  fecha: string;
+  productos: ProductosDevolucion[];
+  page: boolean;
+  setVisible?: React.Dispatch<React.SetStateAction<modalVisible>>;
+  total: number;
+}) => {
   const { devices } = useDevice();
+  const { clientes } = useClientes();
+
   const router = useRouter();
   const [select, setSelect] = useState("");
   const [loading, setLoading] = useState(false);
-
-  const { clientes } = useClientes();
 
   const direccion =
     buscarClienteNombre(cliente, clientes)?.direccion ?? "Desconocida";
@@ -49,22 +48,25 @@ export function Impresoras({
       setLoading(false);
       return;
     }
-    BluetoothManager.connect(address).then(
-      () => {
-        //success here
-        setSelect(address);
-        printToPrinter();
-      },
-      (err: string) => {
-        console.log("Error al conectar", err);
-        Alert.alert("Reintente nuevamente", "Error al conectarse");
-      }
-    ).finally(() => setLoading(false));
+    BluetoothManager.connect(address)
+      .then(
+        () => {
+          //success here
+          setSelect(address);
+          printToPrinter();
+        },
+        (err: string) => {
+          console.log("Error al conectar", err);
+          Alert.alert("Reintente nuevamente", "Error al conectarse");
+        }
+      )
+      .finally(() => {
+        setLoading(false);
+      });
   };
 
-  const printToPrinter = async () => {
+  async function printToPrinter() {
     try {
-      // Encabezado
       await BluetoothEscposPrinter.printerAlign(
         BluetoothEscposPrinter.ALIGN.CENTER
       );
@@ -92,13 +94,15 @@ export function Impresoras({
       });
       await BluetoothEscposPrinter.printText(`Direccion: ${direccion}\n`, {});
       await BluetoothEscposPrinter.printText(
-        `Fecha: ${new Date(fecha).toLocaleDateString()}\n`,
+        `Fecha: ${new Date(fecha).toLocaleDateString()}\n\n`,
         {
           encoding: "UTF8",
         }
       );
-      await BluetoothEscposPrinter.printText(`Estado: ${estado}\n`, {
-        encoding: "UTF8",
+
+      await BluetoothEscposPrinter.printText("Reporte devolucion\n", {
+        widthtimes: 1,
+        heigthtimes: 1,
       });
 
       await BluetoothEscposPrinter.printerAlign(
@@ -158,17 +162,12 @@ export function Impresoras({
         );
       }
 
-      const total = productos.reduce(
-        (acc, { cantidad, precio }) => acc + cantidad * precio,
-        0
-      );
-
       await BluetoothEscposPrinter.printerAlign(
         BluetoothEscposPrinter.ALIGN.LEFT
       );
 
       await BluetoothEscposPrinter.printText(
-        "- - - - - - - - - - - - - - - - ",
+        "- - - - - - - - - - - - - - - - \n\n",
         {}
       );
 
@@ -182,66 +181,33 @@ export function Impresoras({
         ],
         {}
       );
-      // Pagado
-      await BluetoothEscposPrinter.printColumn(
-        [20, 12], // Define los anchos de las columnas (ajusta según tu impresora)
-        [BluetoothEscposPrinter.ALIGN.LEFT, BluetoothEscposPrinter.ALIGN.RIGHT], // Alineación de cada columna
-        [
-          "Pagado", // Contenido de la columna izquierda
-          `C$ ${pagado}`, // Contenido de la columna derecha
-        ],
-        {}
-      );
 
       await BluetoothEscposPrinter.printerAlign(
         BluetoothEscposPrinter.ALIGN.LEFT
       );
 
       await BluetoothEscposPrinter.printText(
-        "- - - - - - - - - - - - - - - - ",
-        {}
-      );
-
-      // saldo
-      await BluetoothEscposPrinter.printColumn(
-        [20, 12], // Define los anchos de las columnas (ajusta según tu impresora)
-        [BluetoothEscposPrinter.ALIGN.LEFT, BluetoothEscposPrinter.ALIGN.RIGHT], // Alineación de cada columna
-        [
-          "Saldo", // Contenido de la columna izquierda
-          `C$ ${total - pagado}`, // Contenido de la columna derecha
-        ],
-        {}
-      );
-      await BluetoothEscposPrinter.printerAlign(
-        BluetoothEscposPrinter.ALIGN.LEFT
-      );
-
-      await BluetoothEscposPrinter.printText(
-        "- - - - - - - - - - - - - - - - ",
+        "- - - - - - - - - - - - - - - - \n\n",
         {}
       );
 
       await BluetoothEscposPrinter.printerAlign(
         BluetoothEscposPrinter.ALIGN.CENTER
       );
-      await BluetoothEscposPrinter.printText("Gracias por su\ncompra\n", {
-        widthtimes: 1,
-        heigthtimes: 1,
-      });
-      await BluetoothEscposPrinter.printText("\n\n", {});
 
-      if (create) {
-        router.push("(drawer)");
-      } else {
-        setVisible && setVisible(false);
-      }
+      await BluetoothEscposPrinter.printText("----------------\n", {});
+
+      await BluetoothEscposPrinter.printText("Firma", {});
+
+      await BluetoothEscposPrinter.printText("\n\n\n", {});
+
+      router.push("(drawer)");
     } catch (error) {
       setSelect("");
       Alert.alert("Reintente nuevamente", "Error al conectarse");
       console.log(error);
     }
-  };
-
+  }
   return (
     <Modal visible={visible} className="bg-white">
       <Text className="text-center font-bold text-xl mt-4">
@@ -250,10 +216,10 @@ export function Impresoras({
       <View className="justify-between items-center flex-row mt-3 ml-3 z-20 mb-6 absolute">
         <Pressable
           onPress={() => {
-            if (create) {
-              router.push("(drawer)");
+            if (page && setVisible) {
+              setVisible(null);
             } else {
-              setVisible && setVisible(false);
+              router.push("(drawer)");
             }
           }}
           className="w-1/3 flex flex-col py-2"
@@ -287,12 +253,10 @@ export function Impresoras({
         <View className="absolute w-screen h-screen bg-black/60 flex justify-center items-center z-50">
           <View className="bg-white flex flex-row justify-center items-center p-4 rounded-lg">
             <ActivityIndicator size="large" />
-            <Text className="text-center ml-4 text-xl font-semibold">
-              Conectando...
-            </Text>
+            <Text className="text-center ml-4 text-xl font-semibold">Conectando...</Text>
           </View>
         </View>
       )}
     </Modal>
   );
-}
+};

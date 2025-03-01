@@ -7,107 +7,54 @@ import { useProductos } from "../../providers/ProductosProvider";
 import { useState } from "react";
 import { PrdSlc } from "../../types/productosSeleccionados";
 import { buscarProductos } from "../../utils/buscarProductos";
+import { ProductosDevolucion } from "../../types/devoluciones";
 
 export default function FacturarId() {
   const router = useRouter();
-  const { id, prod, edit, idFacture, fechaFacture, cantidades } =
+  const { nombre, prod, edit, idFac, fechaFac } =
     useLocalSearchParams() as {
-      id: string;
+      nombre: string;
       prod: string;
       edit?: string;
-      idFacture?: string;
-      fechaFacture?: string;
-      cantidades?: string;
+      idFac?: string;
+      fechaFac?: string;
     };
   const { productos } = useProductos();
 
-  const cant: { [key: string]: number } = cantidades
-    ? JSON.parse(cantidades)
-    : {};
-
   const [prdMost, setPrdMost] = useState(productos);
-  const [prodSelected, setProdSelected] = useState<PrdSlc[]>(
+  const [prodSelected, setProdSelected] = useState<ProductosDevolucion[]>(
     prod ? JSON.parse(prod) : []
   );
-  const [tempValues, setTempValues] = useState<{
-    [key: string]: string | undefined;
-  }>(
-    prod
-      ? () => {
-          const prd: PrdSlc[] = JSON.parse(prod);
-          const tempValues: { [key: string]: string | undefined } = {};
 
-          prd.forEach((pr) => {
-            tempValues[pr.id] = pr.cantidad.toString();
-          });
-
-          return tempValues;
-        }
-      : {}
-  );
   const [search, setSearch] = useState("");
 
-  const addProd = (id: string, nombre: string, precio: number, cantidadPrd: number) => {
-    if (prodSelected.find((prod) => prod.id === id)) return;
-    const canti = cant[id] || 0;
-    if(cantidadPrd + canti === 0) return;
-
-    setProdSelected([...prodSelected, { id, nombre, precio, cantidad: 1 }]);
-    setTempValues((prev) => ({ ...prev, [id]: "1" }));
-  };
-
-  const updateCantidad = (id: string) => {
-    if (tempValues[id] === undefined) return;
-
-    const cantidad = parseFloat(tempValues[id]) || 0;
-
-    if (cantidad === 0) {
-      setProdSelected(prodSelected.filter((prod) => prod.id !== id));
-      return;
-    }
-
-    setProdSelected(
-      prodSelected.map((prod) =>
-        prod.id === id ? { ...prod, cantidad } : prod
-      )
-    );
-  };
-
-  const handleChange = (id: string, cantidad: string, cantidadProd: number) => {
-    const canti = cant[id] || 0;
-    if (cantidadProd + canti < parseFloat(cantidad)) return;
-
-    setTempValues((prev) => ({ ...prev, [id]: cantidad }));
+  const addProd = (
+    id: string,
+    nombre: string,
+    precio: number,
+  ) => {
+    setProdSelected((prev) => [...prev, { id, nombre, precio, cantidad: 1 }]);
   };
 
   const minusHandle = (id: string) => {
-    const tempValue = tempValues[id];
-    const cantidad = parseInt(tempValue || "0", 10) - 1;
-
-    if (cantidad <= 0) {
-      setProdSelected(prodSelected.filter((prod) => prod.id !== id));
-      return;
-    }
-
-    setProdSelected((prev) =>
-      prev.map((prod) => (prod.id === id ? { ...prod, cantidad } : prod))
-    );
-    setTempValues((prev) => ({ ...prev, [id]: cantidad.toString() }));
+    setProdSelected((prev) => {
+      const prod = prev.find((prod) => prod.id === id);
+      if (prod && prod.cantidad > 1) {
+        return prev.map((prod) =>
+          prod.id === id ? { ...prod, cantidad: prod.cantidad - 1 } : prod
+        );
+      } else {
+        return prev.filter((prod) => prod.id !== id);
+      }
+    });
   };
 
-  const plusHandle = (id: string, cantidadProd: number) => {
-    const tempValue = tempValues[id];
-    const canti = cant[id] || 0;
-
-    if (!tempValue) return;
-    const cantidad = parseFloat(tempValue) + 1;
-
-    if (cantidad > cantidadProd + canti) return;
-
+  const plusHandle = (id: string) => {
     setProdSelected((prev) =>
-      prev.map((prod) => (prod.id === id ? { ...prod, cantidad } : prod))
+      prev.map((prod) =>
+        prod.id === id ? { ...prod, cantidad: prod.cantidad + 1 } : prod
+      )
     );
-    setTempValues((prev) => ({ ...prev, [id]: cantidad.toString() }));
   };
 
   const handleSearch = (text: string) => {
@@ -130,9 +77,12 @@ export default function FacturarId() {
         <Ionicons
           onPress={() => {
             if (edit) {
-              router.push("/(drawer)/facturas");
+              router.push("/(drawer)/devoluciones");
             } else {
-              router.push({ pathname: "/facturar", params: { mode: "facturar" } });
+              router.push({
+                pathname: "/facturar",
+                params: { mode: "devolucion" },
+              });
             }
           }}
           name="arrow-back-outline"
@@ -169,8 +119,6 @@ export default function FacturarId() {
       >
         {prdMost.map((producto) => {
           const prod = prodSelected.find((prod) => prod.id === producto.id);
-          const tempValue = tempValues[producto.id];
-          const cantidad = cant[producto.id] || 0;
           return (
             <View
               className="flex flex-row justify-between items-center px-4 py-3 mx-1 border-y-[0.5px] rounded-md"
@@ -183,9 +131,6 @@ export default function FacturarId() {
                 <Text className="text-[12px] text-zinc-800">
                   precio: C$ {producto.precio}
                 </Text>
-                <Text className="text-[12px] text-zinc-800">
-                  cantidad: {producto.cantidad + cantidad}
-                </Text>
               </View>
               {prod && prod.cantidad > 0 ? (
                 <View className="flex flex-row bg-green-500 rounded-md items-center">
@@ -197,19 +142,12 @@ export default function FacturarId() {
                   </Pressable>
                   <TextInput
                     keyboardType="numeric"
-                    value={
-                      tempValue !== undefined
-                        ? tempValue
-                        : prod.cantidad.toString()
-                    }
+                    editable={false}
+                    value={prod.cantidad.toString()}
                     className="bg-white text-black h-6 p-0 w-8 text-center my-1 mx-1"
-                    onChangeText={(text) =>
-                      handleChange(producto.id, text, producto.cantidad)
-                    }
-                    onBlur={(e) => updateCantidad(producto.id)}
                   />
                   <Pressable
-                    onPress={() => plusHandle(prod.id, producto.cantidad)}
+                    onPress={() => plusHandle(prod.id)}
                     className="px-1"
                   >
                     <AntDesign name="plus" size={20} color="white" />
@@ -218,7 +156,11 @@ export default function FacturarId() {
               ) : (
                 <Pressable
                   onPress={() =>
-                    addProd(producto.id, producto.nombre, producto.precio, producto.cantidad)
+                    addProd(
+                      producto.id,
+                      producto.nombre,
+                      producto.precio,
+                    )
                   }
                   className="bg-slate-500 py-1 px-2 rounded-md"
                 >
@@ -233,37 +175,24 @@ export default function FacturarId() {
       </ScrollView>
 
       <View className="w-full h-20 px-3 flex flex-row justify-center items-center">
-        <View className="w-[60%]">
-          <Text className="text-base font-semibold text-zinc-800">
-            Productos: {prodSelected.length}
-          </Text>
-          <Text className="text-base font-semibold text-zinc-800">
-            Total: C${" "}
-            {prodSelected.reduce(
-              (acc, prod) => acc + prod.precio * prod.cantidad,
-              0
-            )}
-          </Text>
-        </View>
-        <View className="w-[40%] h-full items-center justify-center">
+        <View className="w-full h-full items-center justify-center">
           <Pressable
             disabled={prodSelected.length === 0}
             onPress={() =>
               router.push({
-                pathname: `/facturarGuard/${id}`,
+                pathname: `/reporteDevolucion/${nombre}`,
                 params: {
                   prod: JSON.stringify(prodSelected),
                   edit,
-                  idFacture,
-                  fechaFacture,
-                  cantidades,
+                  idFac,
+                  fechaFac,
                 },
               })
             }
             className="bg-green-600 py-2 px-4 rounded-md"
           >
             <Text className="text-base font-semibold text-slate-200">
-              Facturar
+              Devolución
             </Text>
           </Pressable>
         </View>

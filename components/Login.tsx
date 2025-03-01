@@ -31,13 +31,13 @@ export const Login = ({
         Inicia sesión
       </Text>
       <TextInput
-        placeholder="Username"
+        placeholder="Usuario"
         onChangeText={setUsername}
         value={username}
         className="my-4 border-b-2 border-black mx-8 text-black"
       />
       <TextInput
-        placeholder="Password"
+        placeholder="Contraseña"
         onChangeText={setPassword}
         secureTextEntry
         value={password}

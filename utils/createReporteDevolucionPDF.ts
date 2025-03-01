@@ -1,24 +1,21 @@
-
-import { PrdSlc } from "../types/productosSeleccionados";
-import * as Print from "expo-print";
-import { buscarClienteNombre } from "./buscarCliente";
 import { ClienteType } from "../types/clientes";
+import { ProductosDevolucion } from "../types/devoluciones";
+import { buscarClienteNombre } from "./buscarCliente";
+import * as Print from "expo-print";
 
-export async function createPdf(
-  productos: PrdSlc[],
+export async function createReporteDevolucionPDF(
+  productos: ProductosDevolucion[],
   cliente: string,
+  clientes: ClienteType[],
   id: string,
   fecha: Date,
-  estado: string,
-  pagado: number,
-  clientes: ClienteType[],
+  total: number
 ) {
   try {
-    const total = productos.reduce((acc, { cantidad, precio }) => acc + cantidad * precio, 0);
+    const direccion =
+      buscarClienteNombre(cliente, clientes)?.direccion ?? "Desconocida";
 
-    const direccion = buscarClienteNombre(cliente, clientes)?.direccion ?? "Desconocida";
-
-    const htmlContent = `
+      const htmlContent = `
       <!DOCTYPE html>
       <html>
         <head>
@@ -105,7 +102,9 @@ table thead tr th:nth-child(2){
 <p><strong>Cliente:</strong> ${cliente}</p>
 <p><strong>Dirección:</strong> ${direccion}</p>
 <p><strong>Fecha:</strong> ${new Date(fecha).toLocaleDateString()}</p>
-<p><strong>Estado:</strong> ${estado}</p>
+    <br>
+    <h2 style="font-size: 21px; text-align: center">Reporte devolución</h2>
+    <br>
 <div style="margin-top: 10px" class="div-steps"></div>
 <div class="totales">
   <p style="font-weight: bold">Producto</p>
@@ -140,24 +139,14 @@ table thead tr th:nth-child(2){
   <p class="total">Gran total:</p>
   <p>C$ ${total}</p>
 </div>
-<div class="totales">
-  <p class="total">Pagado:</p>
-  <p>C$ ${pagado}</p>
-</div>
-<div class="div-steps"></div>
-<div class="totales">
-  <p class="total">Saldo:</p>
-  <p>C$ ${total - pagado}</p>
-</div>
         </body>
       </html>
     `;
 
     const { uri } = await Print.printToFileAsync({ html: htmlContent });
 
-    return {htmlContent, uri};
-  } catch(error) {
+    return uri;
+  } catch (error) {
     console.error(error);
-    return false;
   }
 }

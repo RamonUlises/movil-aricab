@@ -1,43 +1,39 @@
-import { ActivityIndicator, Alert, Modal, Pressable, ScrollView, Text, View } from "react-native";
-import { useDevice } from "../providers/BluetoothDevices";
-import { Feather } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
+import { useDevice } from "../providers/BluetoothDevices";
 import { useState } from "react";
-import { PrdSlc } from "../types/productosSeleccionados";
-import { buscarClienteNombre } from "../utils/buscarCliente";
 import { useClientes } from "../providers/ClientesProvider";
+import { buscarClienteNombre } from "../utils/buscarCliente";
 import {
   BluetoothManager,
   BluetoothEscposPrinter,
 } from "react-native-bluetooth-escpos-printer";
+import { Modal, Pressable, ScrollView, View, Text, Alert, ActivityIndicator } from "react-native";
+import { Feather } from "@expo/vector-icons";
+import { modalVisible } from "./ModalCambioInfo";
 
-export function Impresoras({
+export const ImpresorasCambio = ({
   visible,
-  id,
-  cliente,
-  estado,
-  productos,
-  fecha,
-  create,
   setVisible,
-  pagado,
+  cliente,
+  id,
+  fecha,
+  productos,
+  page,
 }: {
   visible: boolean;
-  id: string;
+  setVisible?: React.Dispatch<React.SetStateAction<modalVisible>>;
   cliente: string;
-  estado: string;
-  productos: PrdSlc[];
-  fecha: Date;
-  create: boolean;
-  setVisible?: (visible: boolean) => void;
-  pagado: number;
-}) {
+  id: string;
+  fecha: string;
+  productos: { [key: string]: { nombre: string; cantidad: number } };
+  page: boolean;
+}) => {
   const { devices } = useDevice();
+  const { clientes } = useClientes();
+
   const router = useRouter();
   const [select, setSelect] = useState("");
   const [loading, setLoading] = useState(false);
-
-  const { clientes } = useClientes();
 
   const direccion =
     buscarClienteNombre(cliente, clientes)?.direccion ?? "Desconocida";
@@ -62,9 +58,8 @@ export function Impresoras({
     ).finally(() => setLoading(false));
   };
 
-  const printToPrinter = async () => {
+  async function printToPrinter() {
     try {
-      // Encabezado
       await BluetoothEscposPrinter.printerAlign(
         BluetoothEscposPrinter.ALIGN.CENTER
       );
@@ -92,13 +87,15 @@ export function Impresoras({
       });
       await BluetoothEscposPrinter.printText(`Direccion: ${direccion}\n`, {});
       await BluetoothEscposPrinter.printText(
-        `Fecha: ${new Date(fecha).toLocaleDateString()}\n`,
+        `Fecha: ${new Date(fecha).toLocaleDateString()}\n\n`,
         {
           encoding: "UTF8",
         }
       );
-      await BluetoothEscposPrinter.printText(`Estado: ${estado}\n`, {
-        encoding: "UTF8",
+
+      await BluetoothEscposPrinter.printText("Producto mal\nestado\n", {
+        widthtimes: 1,
+        heigthtimes: 1,
       });
 
       await BluetoothEscposPrinter.printerAlign(
@@ -116,7 +113,7 @@ export function Impresoras({
         [BluetoothEscposPrinter.ALIGN.LEFT, BluetoothEscposPrinter.ALIGN.RIGHT], // Alineación de cada columna
         [
           "Producto", // Contenido de la columna izquierda
-          "Monto", // Contenido de la columna derecha
+          "Cantidad", // Contenido de la columna derecha
         ],
         {}
       );
@@ -130,17 +127,7 @@ export function Impresoras({
         {}
       );
 
-      for (const { nombre, cantidad, precio } of productos) {
-        // Calcula el total por producto
-        await BluetoothEscposPrinter.printerAlign(
-          BluetoothEscposPrinter.ALIGN.LEFT
-        );
-        const totalPorProducto = `C$${cantidad * precio}`;
-
-        await BluetoothEscposPrinter.printText(`${nombre}\n`, {
-          encoding: "UTF8",
-        });
-
+      for (const [key, prd] of Object.entries(productos)) {
         // Imprime el nombre y la información del producto en una columna, y el total en otra
         await BluetoothEscposPrinter.printColumn(
           [20, 12], // Define los anchos de las columnas (ajusta según tu impresora)
@@ -149,8 +136,8 @@ export function Impresoras({
             BluetoothEscposPrinter.ALIGN.RIGHT,
           ], // Alineación de cada columna
           [
-            `${cantidad} x ${precio}`, // Contenido de la columna izquierda
-            totalPorProducto, // Contenido de la columna derecha
+            prd.nombre, // Contenido de la columna izquierda
+            prd.cantidad.toString(), // Contenido de la columna derecha
           ],
           {
             encoding: "UTF8",
@@ -158,90 +145,32 @@ export function Impresoras({
         );
       }
 
-      const total = productos.reduce(
-        (acc, { cantidad, precio }) => acc + cantidad * precio,
-        0
-      );
-
       await BluetoothEscposPrinter.printerAlign(
         BluetoothEscposPrinter.ALIGN.LEFT
       );
 
       await BluetoothEscposPrinter.printText(
-        "- - - - - - - - - - - - - - - - ",
-        {}
-      );
-
-      // Total final
-      await BluetoothEscposPrinter.printColumn(
-        [20, 12], // Define los anchos de las columnas (ajusta según tu impresora)
-        [BluetoothEscposPrinter.ALIGN.LEFT, BluetoothEscposPrinter.ALIGN.RIGHT], // Alineación de cada columna
-        [
-          "Gran total", // Contenido de la columna izquierda
-          `C$ ${total}`, // Contenido de la columna derecha
-        ],
-        {}
-      );
-      // Pagado
-      await BluetoothEscposPrinter.printColumn(
-        [20, 12], // Define los anchos de las columnas (ajusta según tu impresora)
-        [BluetoothEscposPrinter.ALIGN.LEFT, BluetoothEscposPrinter.ALIGN.RIGHT], // Alineación de cada columna
-        [
-          "Pagado", // Contenido de la columna izquierda
-          `C$ ${pagado}`, // Contenido de la columna derecha
-        ],
-        {}
-      );
-
-      await BluetoothEscposPrinter.printerAlign(
-        BluetoothEscposPrinter.ALIGN.LEFT
-      );
-
-      await BluetoothEscposPrinter.printText(
-        "- - - - - - - - - - - - - - - - ",
-        {}
-      );
-
-      // saldo
-      await BluetoothEscposPrinter.printColumn(
-        [20, 12], // Define los anchos de las columnas (ajusta según tu impresora)
-        [BluetoothEscposPrinter.ALIGN.LEFT, BluetoothEscposPrinter.ALIGN.RIGHT], // Alineación de cada columna
-        [
-          "Saldo", // Contenido de la columna izquierda
-          `C$ ${total - pagado}`, // Contenido de la columna derecha
-        ],
-        {}
-      );
-      await BluetoothEscposPrinter.printerAlign(
-        BluetoothEscposPrinter.ALIGN.LEFT
-      );
-
-      await BluetoothEscposPrinter.printText(
-        "- - - - - - - - - - - - - - - - ",
+        "- - - - - - - - - - - - - - - - \n\n",
         {}
       );
 
       await BluetoothEscposPrinter.printerAlign(
         BluetoothEscposPrinter.ALIGN.CENTER
       );
-      await BluetoothEscposPrinter.printText("Gracias por su\ncompra\n", {
-        widthtimes: 1,
-        heigthtimes: 1,
-      });
-      await BluetoothEscposPrinter.printText("\n\n", {});
 
-      if (create) {
-        router.push("(drawer)");
-      } else {
-        setVisible && setVisible(false);
-      }
+      await BluetoothEscposPrinter.printText("----------------\n", {});
+
+      await BluetoothEscposPrinter.printText("Firma", {});
+
+      await BluetoothEscposPrinter.printText("\n\n\n", {});
+
+      router.push("(drawer)");
     } catch (error) {
       setSelect("");
       Alert.alert("Reintente nuevamente", "Error al conectarse");
       console.log(error);
     }
-  };
-
+  }
   return (
     <Modal visible={visible} className="bg-white">
       <Text className="text-center font-bold text-xl mt-4">
@@ -250,10 +179,10 @@ export function Impresoras({
       <View className="justify-between items-center flex-row mt-3 ml-3 z-20 mb-6 absolute">
         <Pressable
           onPress={() => {
-            if (create) {
-              router.push("(drawer)");
+            if (page && setVisible) {
+              setVisible(null);
             } else {
-              setVisible && setVisible(false);
+              router.push("(drawer)");
             }
           }}
           className="w-1/3 flex flex-col py-2"
@@ -295,4 +224,4 @@ export function Impresoras({
       )}
     </Modal>
   );
-}
+};

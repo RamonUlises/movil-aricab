@@ -36,7 +36,6 @@ export default function ClientesProvider({ children }: { children: React.ReactNo
 
   useEffect(() => {
     socket.on('clienteAdd', (cliente: ClienteType) => {
-      console.log("add cliente", cliente);
       addCliente(cliente);
     });
 

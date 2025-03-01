@@ -16,6 +16,7 @@ export type modalVisible = null | "ver" | "editar" | "abonar" | "menu";
 export function Facturas({ facturas }: { facturas: FacturaType[] }) {
   const router = useRouter();
   const { clientes } = useClientes();
+  
   // Agrupar facturas por fecha y hora (sin segundos) para mostrarlas en la lista, ordenar
   const facturasPorFecha = facturas.reduce(
     (acc: Record<string, FacturaType[]>, factura) => {

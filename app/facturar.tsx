@@ -9,18 +9,27 @@ import {
   View,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { useRouter } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { useClientes } from "../providers/ClientesProvider";
 import { useFacturas } from "../providers/FacturasProvider";
 import { buscarClientes } from "../utils/buscarClientes";
+
+export type modeType = "facturar" | "cambio" | "devolucion";
 
 export default function facturar() {
   const router = useRouter();
   const { clientes } = useClientes();
   const { facturas } = useFacturas();
+  const { mode } = useLocalSearchParams() as { mode: modeType };
 
   const moveFacturar = (id: string) => {
-    router.push({ pathname: `/facturarProd/${id}` });
+    if (mode === "facturar"){
+      router.push({ pathname: `/facturarProd/${id}` });
+    } else if (mode === "cambio") {
+      router.push({ pathname: `/prodCambio/${id}` });
+    } else if (mode === "devolucion") {
+      router.push({ pathname: `/prodDevolucion/${id}` });
+    }
   };
 
   const [search, setSearch] = useState("");
