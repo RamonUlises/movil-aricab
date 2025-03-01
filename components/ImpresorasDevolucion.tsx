@@ -100,7 +100,7 @@ export const ImpresorasDevolucion = ({
         }
       );
 
-      await BluetoothEscposPrinter.printText("Reporte devolucion\n", {
+      await BluetoothEscposPrinter.printText("Reporte\ndevolucion\n", {
         widthtimes: 1,
         heigthtimes: 1,
       });
@@ -167,7 +167,7 @@ export const ImpresorasDevolucion = ({
       );
 
       await BluetoothEscposPrinter.printText(
-        "- - - - - - - - - - - - - - - - \n\n",
+        "- - - - - - - - - - - - - - - - \n",
         {}
       );
 
@@ -201,7 +201,13 @@ export const ImpresorasDevolucion = ({
 
       await BluetoothEscposPrinter.printText("\n\n\n", {});
 
-      router.push("(drawer)");
+
+      if (page && setVisible) {
+        setVisible(null);
+      } else {
+        router.push("(drawer)");
+      }
+
     } catch (error) {
       setSelect("");
       Alert.alert("Reintente nuevamente", "Error al conectarse");

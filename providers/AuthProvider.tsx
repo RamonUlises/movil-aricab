@@ -5,6 +5,7 @@ import { server } from "../lib/server";
 import { Login } from "../components/Login";
 import { StatusBar } from "expo-status-bar";
 import { io } from "socket.io-client";
+import { NotConnection } from "../components/NotConnection";
 
 const AuthContext = createContext({
   isAuthenticated: false,
@@ -108,6 +109,7 @@ export default function AuthProvider ({ children }: { children: React.ReactNode}
       {
         isAuthenticated ? children : <Login login={login} />
       }
+      <NotConnection />
     </AuthContext.Provider>
   );
 }

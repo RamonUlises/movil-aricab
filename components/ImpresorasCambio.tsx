@@ -164,7 +164,11 @@ export const ImpresorasCambio = ({
 
       await BluetoothEscposPrinter.printText("\n\n\n", {});
 
-      router.push("(drawer)");
+      if (page && setVisible) {
+        setVisible(null);
+      } else {
+        router.push("(drawer)");
+      }
     } catch (error) {
       setSelect("");
       Alert.alert("Reintente nuevamente", "Error al conectarse");
