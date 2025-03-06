@@ -10,7 +10,7 @@ import {
   TextInput,
 } from "react-native";
 import { Ionicons, AntDesign } from "@expo/vector-icons";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useAuth } from "../../providers/AuthProvider";
 import { crearFacturaServer, editarFacturaServer } from "../../lib/facturas";
 import { createPdf } from "../../utils/createPdf";
@@ -53,6 +53,16 @@ export default function FacturarId() {
   const handleChange = (id: string, cantidad: string) => {
     setTempValues((prev) => ({ ...prev, [id]: cantidad }));
   };
+
+  const [permission, setPermission] = useState(false);
+
+  useEffect(() => {
+    if(admin === true){
+      setPermission(true)
+    } else {
+      setPermission(false)
+    }
+  }, [admin])
 
   const updatePrecio = (id: string) => {
     const tempValue = tempValues[id];
@@ -267,7 +277,7 @@ export default function FacturarId() {
                       className="bg-zinc-300 text-black mx-2 h-8 p-0 w-12 text-center border border-zinc-500"
                       onChangeText={(text) => handleChange(prod.id, text)}
                       onBlur={(e) => updatePrecio(prod.id)}
-                      editable={admin}
+                      editable={permission}
                     />
                   </View>
 
