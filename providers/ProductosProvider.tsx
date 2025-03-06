@@ -49,15 +49,35 @@ export default function ProductosProvider({
   };
 
   useEffect(() => {
-    socket.on("updateProd", async () => {
+    socket.on("updateProd", () => {
       setProductos([]);
       fetchProductos();
+    });
+
+    socket.on("productUpdate", ({ id, nombre, precioVenta }: { id: string, nombre: string, precioVenta: number}) => {
+      setProductos((productos) => {
+        const newProductos = productos.map((producto) => {
+          if (producto.id === id) {
+            return {
+              id: producto.id,
+              cantidad: producto.cantidad,
+              nombre,
+              precio: precioVenta,
+            };
+          }
+
+          return producto;
+        });
+
+        return newProductos;
+      });
     });
 
     fetchProductos();
 
     return () => {
       socket.off("updateProd");
+      socket.off("productUpdate");
     };
   }, []);
 
