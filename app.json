@@ -35,7 +35,19 @@
       "bundler": "metro"
     },
     "plugins": [
-      "expo-router"
+      "expo-router",
+      [
+        "expo-splash-screen",
+        {
+          "backgroundColor": "#ffffff",
+          "image": "./assets/splash-icon.png",
+          "dark": {
+            "image": "./assets/splash-icon.png",
+            "backgroundColor": "#ffffff"
+          },
+          "imageWidth": 200
+        }
+      ]
     ],
     "extra": {
       "router": {
