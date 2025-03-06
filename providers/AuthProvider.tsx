@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useState } from "react";
-import AsyncStorage from '@react-native-async-storage/async-storage/src';
+import AsyncStorage from "@react-native-async-storage/async-storage/src";
 import { ActivityIndicator, View } from "react-native";
 import { server } from "../lib/server";
 import { Login } from "../components/Login";
@@ -18,7 +18,11 @@ const AuthContext = createContext({
 
 const socket = io(server.url);
 
-export default function AuthProvider ({ children }: { children: React.ReactNode}) {
+export default function AuthProvider({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [loading, setLoading] = useState(true);
   const [token, setToken] = useState("");
@@ -29,7 +33,7 @@ export default function AuthProvider ({ children }: { children: React.ReactNode}
     const loadAuth = async () => {
       const token = await AsyncStorage.getItem("userToken");
       const usuarioo = await AsyncStorage.getItem("usuario");
-      
+
       if (token !== null && usuarioo !== null) {
         setIsAuthenticated(true);
         setToken(token);
@@ -40,11 +44,17 @@ export default function AuthProvider ({ children }: { children: React.ReactNode}
 
       setIsAuthenticated(false);
       setLoading(false);
-    }
+    };
 
-    socket.on("permisoAdmin", (id: string) => {
-      console.log(id, token);
-      if (id === token) {
+    loadAuth();
+
+    socket.on("permisoAdmin", async (id: string) => {
+      const tokenUser = id.trim();
+      const tokenU = await AsyncStorage.getItem("userToken");
+
+      if(tokenU === null) return;
+
+      if (tokenUser.trim() === tokenU.trim()) {
         setAdmin(true);
         // permiso por 3 minutos
 
@@ -54,11 +64,9 @@ export default function AuthProvider ({ children }: { children: React.ReactNode}
       }
     });
 
-    loadAuth();
-
     return () => {
       socket.off("permisoAdmin");
-    }
+    };
   }, []);
 
   const login = async (usuario: string, password: string) => {
@@ -67,14 +75,14 @@ export default function AuthProvider ({ children }: { children: React.ReactNode}
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          'Authorization': `Basic ${server.credetials}`
+          Authorization: `Basic ${server.credetials}`,
         },
         body: JSON.stringify({ usuario, password }),
-      })
+      });
 
       const { message, token, usuarioo } = await response.json();
 
-      if(response.status !== 200){
+      if (response.status !== 200) {
         return alert(message);
       }
 
@@ -84,31 +92,35 @@ export default function AuthProvider ({ children }: { children: React.ReactNode}
       setIsAuthenticated(true);
       setToken(token);
       setUsuario(usuarioo);
-    } catch(error) {
+    } catch (error) {
       console.error(error);
-     setLoading(false);
+      setLoading(false);
     }
   };
 
   const logout = async () => {
     await AsyncStorage.removeItem("userToken");
+    await AsyncStorage.removeItem("usuario");
     setIsAuthenticated(false);
+    setToken("");
+    setAdmin(false);
+    setUsuario("");
   };
 
-  if(loading) {
+  if (loading) {
     return (
       <View className="bg-slate-200 w-full h-full justify-center items-center">
         <ActivityIndicator size="large" />
       </View>
-    )
+    );
   }
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, login, logout, token, admin, usuario }}>
+    <AuthContext.Provider
+      value={{ isAuthenticated, login, logout, token, admin, usuario }}
+    >
       <StatusBar style="dark" translucent />
-      {
-        isAuthenticated ? children : <Login login={login} />
-      }
+      {isAuthenticated ? children : <Login login={login} />}
       <NotConnection />
     </AuthContext.Provider>
   );
