@@ -23,7 +23,6 @@ export function DevicesProvider({ children }: { children: React.ReactNode }) {
 
       // Escanear dispositivos Bluetooth
       const foundDevices = await BluetoothManager.scanDevices();
-      console.log("Dispositivos encontrados");
       const parsedDevices = JSON.parse(foundDevices || "{}"); // El resultado está en formato JSON
       const { paired, found } = parsedDevices;
 
@@ -43,23 +42,11 @@ export function DevicesProvider({ children }: { children: React.ReactNode }) {
   async function requestPermissions() {
     if (Platform.OS === "android" && Platform.Version >= 31) {
       try {
-        const granted = await PermissionsAndroid.requestMultiple([
+        await PermissionsAndroid.requestMultiple([
           PermissionsAndroid.PERMISSIONS.BLUETOOTH_SCAN,
           PermissionsAndroid.PERMISSIONS.BLUETOOTH_CONNECT,
           PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
         ]);
-
-        if (
-          granted["android.permission.BLUETOOTH_SCAN"] ===
-            PermissionsAndroid.RESULTS.GRANTED &&
-          granted["android.permission.BLUETOOTH_CONNECT"] ===
-            PermissionsAndroid.RESULTS.GRANTED &&
-          granted["android.permission.ACCESS_FINE_LOCATION"]
-        ) {
-          console.log("Permisos de Bluetooth concedidos.");
-        } else {
-          console.warn("Permisos de Bluetooth denegados.");
-        }
       } catch (err) {
         console.error("Error al solicitar permisos:", err);
       }
