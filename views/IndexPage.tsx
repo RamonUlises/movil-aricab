@@ -19,7 +19,7 @@ import { InfoCambios } from "../components/InfoCambios";
 import { useCambios } from "../providers/CambiosProvider";
 import { InfoProductos } from "../components/InfoProductos";
 import { useDevoluciones } from "../providers/DevolucionesProvider";
-import { BarChart, LineChart } from "react-native-chart-kit";
+import { LineChart } from "react-native-chart-kit";
 
 export const IndexPage = ({ logout }: { logout: () => Promise<void> }) => {
   const { usuario } = useAuth();

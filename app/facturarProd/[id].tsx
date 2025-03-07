@@ -6,7 +6,6 @@ import { Platform } from "react-native";
 import { useProductos } from "../../providers/ProductosProvider";
 import { useState } from "react";
 import { PrdSlc } from "../../types/productosSeleccionados";
-import { buscarProductos } from "../../utils/buscarProductos";
 
 export default function FacturarId() {
   const router = useRouter();
