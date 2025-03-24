@@ -16,7 +16,6 @@ import {
 import { Facturas } from "../components/Facturas";
 import { useFacturas } from "../providers/FacturasProvider";
 import { FacturaType } from "../types/facturas";
-import { buscarFacturaCliente } from "../utils/buscarFacturaCliente";
 
 interface Route {
   key: string;
@@ -61,7 +60,7 @@ export function FacturasPage() {
       setFacturasSelected(facturas);
       return;
     }
-    const resulst = buscarFacturaCliente(facturas, text);
+    const resulst = facturas.filter(fac => fac.nombre.toLowerCase().includes(text.toLowerCase()))
     setFacturasSelected(resulst);
   };
 
