@@ -95,32 +95,26 @@ export function Facturas({ facturas }: { facturas: FacturaType[] }) {
                   </View>
                   <View>
                     <Text className="text-sm font-medium text-zinc-800">
-                      C$ {factura.total - factura.pagado}
+                      C$ {factura.total.toFixed(2)}
                     </Text>
                   </View>
                 </Pressable>
               );
             })}
             <Modal
-              className="flex w-screen h-screen absolute bg-black/50 z-50"
+              className="flex w-screen h-screen justify-center items-center"
               transparent={true}
               visible={modalVisible === "menu"}
-              animationType="fade"
             >
               <Pressable
-                className="w-full h-full"
+                className="w-full h-full flex justify-center absolute items-center bg-black/40"
                 onPress={() => {
                   setModalVisible(null);
                   setSelectedFactura({} as FacturaType);
                 }}
               />
               <View
-                className="w-40 bg-white overflow-hidden"
-                style={{
-                  position: "absolute",
-                  top: 199 + index * 68,
-                  right: 15,
-                }}
+                className="w-40 bg-white overflow-hidden z-[60] mx-auto my-auto"
               >
                 <Pressable
                   className="py-4 border-b-[0.8px] flex flex-row pl-2 gap-4"
@@ -222,6 +216,7 @@ export function Facturas({ facturas }: { facturas: FacturaType[] }) {
                   <Text>Abonar a factura</Text>
                 </Pressable>
               </View>
+              
             </Modal>
           </View>
         ))

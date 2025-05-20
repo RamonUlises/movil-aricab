@@ -108,14 +108,14 @@ export default function FacturarId() {
           tipo: estado,
           facturador: token,
           fecha,
-          pagado: pagadoo,
+          pagado: Math.ceil(pagadoo),
         });
       } else {
         response = await editarFacturaServer({
           id: idFac,
           productos,
           tipo: estado,
-          pagado: pagadoo,
+          pagado: Math.ceil(pagadoo),
         });
       }
 
@@ -147,14 +147,14 @@ export default function FacturarId() {
           tipo: estado,
           facturador: token,
           fecha,
-          pagado: pagadoo,
+          pagado: Math.ceil(pagadoo),
         });
       } else {
         response = await editarFacturaServer({
           id: idFac,
           productos,
           tipo: estado,
-          pagado: pagadoo,
+          pagado: Math.ceil(pagadoo),
         });
       }
 
@@ -165,7 +165,7 @@ export default function FacturarId() {
           idFac,
           fecha,
           estado,
-          pagadoo,
+          Math.ceil(pagadoo),
           clientes
         );
 
@@ -207,14 +207,14 @@ export default function FacturarId() {
           tipo: estado,
           facturador: token,
           fecha,
-          pagado: pagadoo,
+          pagado: Math.ceil(pagadoo),
         });
       } else {
         response = await editarFacturaServer({
           id: idFac,
           productos,
           tipo: estado,
-          pagado: pagadoo,
+          pagado: Math.ceil(pagadoo),
         });
       }
 
@@ -297,10 +297,10 @@ export default function FacturarId() {
           <Text className="font-semibold text-white">Gran total</Text>
           <Text className="font-semibold text-white">
             C${" "}
-            {productos.reduce(
+            {Math.ceil(productos.reduce(
               (acc, prod) => acc + prod.precio * prod.cantidad,
               0
-            )}
+            ))}
           </Text>
         </View>
         <View className="flex flex-row justify-between items-center px-4 py-2">
@@ -308,10 +308,10 @@ export default function FacturarId() {
             <Text className="text-[10px] font-semibold">Saldo: </Text>
             <Text className="font-semibold">
               C${" "}
-              {estado === 'crédito' ? productos.reduce(
+              {estado === 'crédito' ? Math.ceil(productos.reduce(
                 (acc, prod) => acc + prod.precio * prod.cantidad,
                 0
-              ) - pagado : 0 }
+              ) - pagado) : 0 }
             </Text>
           </View>
 
@@ -348,10 +348,10 @@ export default function FacturarId() {
                 return;
               }
 
-              if(parseFloat(text) > productos.reduce(
+              if(parseFloat(text) > Math.ceil(productos.reduce(
                 (acc, prod) => acc + prod.precio * prod.cantidad,
                 0
-              )) return;
+              ))) return;
 
               setPagado(parseFloat(text));
             }}
@@ -424,6 +424,7 @@ export default function FacturarId() {
         fecha={fecha}
         create={true}
         pagado={pagado}
+        setVisible={setVisible}
       />
     </SafeAreaView>
   );

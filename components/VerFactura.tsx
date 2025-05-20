@@ -18,7 +18,7 @@ export const VerFactura = ({
         onPress={() => setVisible(null)}
         className="flex w-screen h-screen bg-black/50 justify-center items-center"
       >
-        <View className="bg-white w-11/12 h-5/6 rounded-md px-3 py-2 relative">
+        <View className="bg-white w-11/12 h-5/6 rounded-md px-3 py-2 relative z-20">
           <Pressable onPress={() => setVisible(null)} className="absolute top-2 right-2 w-8">
             <AntDesign name="close" size={28} color="#27272a" />
           </Pressable>

@@ -109,6 +109,9 @@ export const IndexPage = ({ logout }: { logout: () => Promise<void> }) => {
     }
   }, [confirmed, logout]);
 
+
+  const totalNeto = facturasHoy.filter(f => f.tipo === 'contado' || f.tipo === 'crédito').reduce((acc, f) => acc + f.pagado, 0) - parseFloat(devolucionesHoy.toFixed(2));
+
   return (
     <SafeAreaView
       className={`flex w-full h-full p-2 bg-slate-200 ${
@@ -146,13 +149,18 @@ export const IndexPage = ({ logout }: { logout: () => Promise<void> }) => {
             Devolución: C$ {devolucionesHoy}
           </Text>
         </View>
+        <View className="mx-auto mb-4 py-2 rounded-sm">
+          <Text className="text-center text-lg text-zinc-800">
+            Abonos: C$ {facturasHoy.filter(f => f.tipo === 'crédito').reduce((acc, f) => acc + f.pagado, 0)}
+          </Text>
+        </View>
         <View className="flex flex-row mb-4">
           <Text className="font-medium bg-green-600 w-1/2 text-center text-xl text-white rounded-r-xl">
             Total Neto:
           </Text>
           <Text className="font-medium text-green-600 w-1/2 -ml-2 text-center text-xl rounded-r-xl border-y border-green-600 border-r">
             C${" "}
-            {facturasHoy.filter(f => f.tipo === 'contado').reduce((acc, f) => acc + f.total, 0) - devolucionesHoy}
+            {totalNeto.toFixed(2)}
           </Text>
         </View>
 

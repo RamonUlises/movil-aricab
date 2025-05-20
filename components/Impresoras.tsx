@@ -158,10 +158,12 @@ export function Impresoras({
         );
       }
 
-      const total = productos.reduce(
+      const total = parseFloat(productos.reduce(
         (acc, { cantidad, precio }) => acc + cantidad * precio,
         0
-      );
+      ).toFixed(2));
+
+      const pagadoo = parseFloat(pagado.toFixed(2));
 
       await BluetoothEscposPrinter.printerAlign(
         BluetoothEscposPrinter.ALIGN.LEFT
@@ -188,7 +190,7 @@ export function Impresoras({
         [BluetoothEscposPrinter.ALIGN.LEFT, BluetoothEscposPrinter.ALIGN.RIGHT], // Alineación de cada columna
         [
           "Pagado", // Contenido de la columna izquierda
-          `C$ ${pagado}`, // Contenido de la columna derecha
+          `C$ ${pagadoo}`, // Contenido de la columna derecha
         ],
         {}
       );
@@ -208,7 +210,7 @@ export function Impresoras({
         [BluetoothEscposPrinter.ALIGN.LEFT, BluetoothEscposPrinter.ALIGN.RIGHT], // Alineación de cada columna
         [
           "Saldo", // Contenido de la columna izquierda
-          `C$ ${total - pagado}`, // Contenido de la columna derecha
+          `C$ ${total - pagadoo}`, // Contenido de la columna derecha
         ],
         {}
       );
@@ -232,6 +234,7 @@ export function Impresoras({
 
       if (create) {
         router.push("(drawer)");
+        setVisible && setVisible(false);
       } else {
         setVisible && setVisible(false);
       }

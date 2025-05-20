@@ -253,10 +253,10 @@ export default function FacturarId() {
           </Text>
           <Text className="text-base font-semibold text-zinc-800">
             Total: C${" "}
-            {prodSelected.reduce(
+            {Math.ceil(prodSelected.reduce(
               (acc, prod) => acc + prod.precio * prod.cantidad,
               0
-            )}
+            ))}
           </Text>
         </View>
         <View className="w-[40%] h-full items-center justify-center">

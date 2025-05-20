@@ -2,27 +2,28 @@ import { Platform, SafeAreaView, ScrollView, Text, TextInput, View } from "react
 import { useClientes } from "../providers/ClientesProvider";
 import { useFacturas } from "../providers/FacturasProvider";
 import { useEffect, useState } from "react";
-import { buscarClientes } from "../utils/buscarClientes";
+import { ClienteType } from "../types/clientes";
 
 export function ClientesPage() {
   const { clientes } = useClientes();
   const { facturas } = useFacturas();
 
   const [search, setSearch] = useState("");
-  const [clientesSelected, setClientesSelected] = useState(clientes);
+  const [clientesSelected, setClientesSelected] = useState<ClienteType[]>([]);
 
   function handleSearch(text: string) {
     setSearch(text);
     if(text === "") {
-      setClientesSelected(clientes);
+      setClientesSelected([]);
       return;
     }
-    const result = buscarClientes(clientes, text);
+    const result = clientes.filter((cliente) => cliente.nombres.toLowerCase().includes(text.toLowerCase()));
+    
     setClientesSelected(result);
   }
 
   useEffect(() => {
-    setClientesSelected(clientes);
+    setClientesSelected([]);
   }, [clientes]);
 
   return (

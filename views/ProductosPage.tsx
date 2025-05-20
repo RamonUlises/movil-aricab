@@ -1,7 +1,6 @@
 import { Platform, SafeAreaView, ScrollView, Text, TextInput, View } from "react-native";
 import { useProductos } from "../providers/ProductosProvider";
 import { useEffect, useState } from "react";
-import { buscarProductos } from "../utils/buscarProductos";
 
 export const ProductosPage = () => {
   const { productos } = useProductos();
@@ -15,7 +14,10 @@ export const ProductosPage = () => {
       setProductosSelected(productos);
       return;
     }
-    const result = buscarProductos(text, productos);
+    const result = productos.filter((prd) =>
+      prd.nombre.toLowerCase().includes(text.toLowerCase())
+    );
+    
     setProductosSelected(result);
   }
 

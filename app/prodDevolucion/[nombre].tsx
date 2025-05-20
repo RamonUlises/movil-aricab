@@ -5,8 +5,6 @@ import { View, Text } from "react-native";
 import { Platform } from "react-native";
 import { useProductos } from "../../providers/ProductosProvider";
 import { useState } from "react";
-import { PrdSlc } from "../../types/productosSeleccionados";
-import { buscarProductos } from "../../utils/buscarProductos";
 import { ProductosDevolucion } from "../../types/devoluciones";
 
 export default function FacturarId() {
@@ -61,7 +59,9 @@ export default function FacturarId() {
     if (text === "") {
       setPrdMost(productos);
     } else {
-      const filtered = buscarProductos(text, productos);
+      const filtered = productos.filter((producto) =>
+        producto.nombre.toLowerCase().includes(text.toLowerCase())
+      );
 
       setPrdMost(filtered);
     }

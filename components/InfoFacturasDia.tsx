@@ -6,6 +6,18 @@ export const InfoFacturasDia = ({
 }: {
   facturasHoy: FacturaType[];
 }) => {
+  const totalContado = facturasHoy
+    .filter((f) => f.tipo === "contado")
+    .reduce((acc, f) => acc + f.total, 0)
+    .toFixed(2);
+
+  const totalCredito = facturasHoy
+    .filter((f) => f.tipo === "crédito")
+    .reduce((acc, f) => acc + f.total, 0)
+    .toFixed(2);
+
+  const total = facturasHoy.reduce((acc, f) => acc + f.total, 0).toFixed(2);
+
   return (
     <>
       <View className="w-full flex flex-col gap-2">
@@ -15,10 +27,7 @@ export const InfoFacturasDia = ({
             {facturasHoy.filter((f) => f.tipo === "contado").length}
           </Text>
           <Text className="font-medium text-green-600 w-1/2 -ml-2 text-center text-xl rounded-r-xl border-y border-green-600 border-r">
-          C${" "}
-            {facturasHoy
-              .filter((f) => f.tipo === "contado")
-              .reduce((acc, f) => acc + f.total, 0)}
+            C$ {totalContado}
           </Text>
         </View>
         <Text className="text-xl font-semibold">Credito:</Text>
@@ -27,10 +36,7 @@ export const InfoFacturasDia = ({
             {facturasHoy.filter((f) => f.tipo === "crédito").length}
           </Text>
           <Text className="font-medium text-green-600 w-1/2 -ml-2 text-center text-xl rounded-r-xl border-y border-green-600 border-r">
-          C${" "}
-            {facturasHoy
-              .filter((f) => f.tipo === "crédito")
-              .reduce((acc, f) => acc + f.total, 0)}
+            C$ {totalCredito}
           </Text>
         </View>
         <Text className="text-xl font-semibold">Total:</Text>
@@ -39,7 +45,7 @@ export const InfoFacturasDia = ({
             {facturasHoy.length}
           </Text>
           <Text className="font-medium text-green-600 w-1/2 -ml-2 text-center text-xl rounded-r-xl border-y border-green-600 border-r">
-          C$ {facturasHoy.reduce((acc, f) => acc + f.total, 0)}
+            C$ {total}
           </Text>
         </View>
       </View>

@@ -1,5 +1,5 @@
 const editing = false;
-const produccion = "https://aricab.nextstep-web.online";
+const produccion = "https://api.aricab.shop";
 const desarrollo = "http://192.168.1.27:3000";
 
 const username = "aricab-1123-r-company".trim();

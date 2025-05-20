@@ -12,7 +12,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useClientes } from "../providers/ClientesProvider";
 import { useFacturas } from "../providers/FacturasProvider";
-import { buscarClientes } from "../utils/buscarClientes";
+import { ClienteType } from "../types/clientes";
 
 export type modeType = "facturar" | "cambio" | "devolucion";
 
@@ -33,18 +33,27 @@ export default function facturar() {
   };
 
   const [search, setSearch] = useState("");
-  const [clientesSelected, setClientesSelected] = useState(clientes);
+  const [clientesSelected, setClientesSelected] = useState<ClienteType[]>([]);
 
   const handleSearch = (text: string) => {
     setSearch(text);
     if (text === "") {
-      setClientesSelected(clientes);
+      setClientesSelected([]);
       return;
     }
 
-    const filtered = buscarClientes(clientes, text);
-
+    const filtered = [];
+    const lowerText = text.toLowerCase();
+    
+    for (const cliente of clientes) {
+      if (cliente.nombres.toLowerCase().includes(lowerText)) {
+        filtered.push(cliente);
+        if (filtered.length === 20) break; // detener al llegar a 20
+      }
+    }
+    
     setClientesSelected(filtered);
+    
   };
 
   return (
