@@ -158,12 +158,12 @@ export function Impresoras({
         );
       }
 
-      const total = parseFloat(productos.reduce(
+      const total = Math.ceil(productos.reduce(
         (acc, { cantidad, precio }) => acc + cantidad * precio,
         0
-      ).toFixed(2));
+      ));
 
-      const pagadoo = parseFloat(pagado.toFixed(2));
+      const pagadoo = Math.ceil(pagado);
 
       await BluetoothEscposPrinter.printerAlign(
         BluetoothEscposPrinter.ALIGN.LEFT
