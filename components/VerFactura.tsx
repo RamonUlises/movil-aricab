@@ -15,11 +15,13 @@ export const VerFactura = ({
   return (
     <Modal animationType="slide" visible={visible} transparent={true}>
       <Pressable
-        onPress={() => setVisible(null)}
-        className="flex w-screen h-screen bg-black/50 justify-center items-center"
-      >
-        <View className="bg-white w-11/12 h-5/6 rounded-md px-3 py-2 relative z-20">
-          <Pressable onPress={() => setVisible(null)} className="absolute top-2 right-2 w-8">
+        onPress={(event) => {
+          event.stopPropagation();
+          setVisible(null)}}
+        className="flex w-screen h-screen bg-black/50 justify-center items-center absolute top-0 left-0 z-10"
+      />
+        <View className="bg-white w-11/12 h-5/6 rounded-md px-3 py-2 relative z-20 m-auto">
+          <Pressable onPress={() => setVisible(null)} className="absolute top-2 right-2 w-8 z-30">
             <AntDesign name="close" size={28} color="#27272a" />
           </Pressable>
           <Text className="text-center font-bold text-xl">Ari-Cab</Text>
@@ -78,7 +80,6 @@ export const VerFactura = ({
             </Text>
           </View>
         </View>
-      </Pressable>
     </Modal>
   );
 };

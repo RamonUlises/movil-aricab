@@ -13,30 +13,24 @@ import {
 import { useEffect, useState } from "react";
 import { useAuth } from "../providers/AuthProvider";
 import { useFacturas } from "../providers/FacturasProvider";
-import { InfoFacturasDia } from "../components/InfoFacturasDia";
 import { ModalOptionss } from "../components/ModalOptionss";
-import { InfoCambios } from "../components/InfoCambios";
 import { useCambios } from "../providers/CambiosProvider";
-import { InfoProductos } from "../components/InfoProductos";
 import { useDevoluciones } from "../providers/DevolucionesProvider";
 import { LineChart } from "react-native-chart-kit";
+import { ResumenDia } from "../components/ResumenDia";
+import { Calendar } from "react-native-calendars";
+import { FacturaType } from "../types/facturas";
+import { server } from "../lib/server";
+import { DevolucionesType } from "../types/devoluciones";
+import { CambiosType } from "../types/cambios";
 
 export const IndexPage = ({ logout }: { logout: () => Promise<void> }) => {
-  const { usuario } = useAuth();
+  const { usuario, token } = useAuth();
   const { facturas } = useFacturas();
   const { cambios } = useCambios();
   const { devoluciones } = useDevoluciones();
 
-  const [facturasHoy, setFacturasHoy] = useState(() => {
-    const hoy = new Date();
-    return facturas.filter(
-      (f) =>
-        new Date(f.fecha).getDate() === hoy.getDate() &&
-        new Date(f.fecha).getMonth() === hoy.getMonth() &&
-        new Date(f.fecha).getFullYear() === hoy.getFullYear()
-    );
-  });
-  const [facturasSemanaPasada] = useState(() => {
+  /*   const [facturasSemanaPasada] = useState(() => {
     const hoy = new Date();
     const semanaPasada = new Date(hoy);
     semanaPasada.setDate(hoy.getDate() - 8);
@@ -46,43 +40,10 @@ export const IndexPage = ({ logout }: { logout: () => Promise<void> }) => {
         new Date(f.fecha).getMonth() === semanaPasada.getMonth() &&
         new Date(f.fecha).getFullYear() === semanaPasada.getFullYear()
     );
-  });
-
-  const [devolucionesHoy, setDevolucionesHoy] = useState(() => {
-    return devoluciones
-      .filter(
-        (d) =>
-          new Date(d.fecha).getDate() === new Date().getDate() &&
-          new Date(d.fecha).getMonth() === new Date().getMonth() &&
-          new Date(d.fecha).getFullYear() === new Date().getFullYear()
-      )
-      .reduce((acc, d) => acc + d.total, 0);
-  });
+  }); */
 
   const [confirmed, setConfirmed] = useState(false);
   const [visible, setVisible] = useState(false);
-
-  useEffect(() => {
-    const hoy = new Date();
-    setFacturasHoy(
-      facturas.filter(
-        (f) =>
-          new Date(f.fecha).getDate() === hoy.getDate() &&
-          new Date(f.fecha).getMonth() === hoy.getMonth() &&
-          new Date(f.fecha).getFullYear() === hoy.getFullYear()
-      )
-    );
-    setDevolucionesHoy(
-      devoluciones
-        .filter(
-          (d) =>
-            new Date(d.fecha).getDate() === hoy.getDate() &&
-            new Date(d.fecha).getMonth() === hoy.getMonth() &&
-            new Date(d.fecha).getFullYear() === hoy.getFullYear()
-        )
-        .reduce((acc, d) => acc + d.total, 0)
-    );
-  }, [facturas]);
 
   async function handleLogout() {
     Alert.alert(
@@ -109,8 +70,45 @@ export const IndexPage = ({ logout }: { logout: () => Promise<void> }) => {
     }
   }, [confirmed, logout]);
 
+  const [selectedDay, setSelectedDay] = useState<string | null>(null);
+  const [facturasSelectedDay, setFacturasSelectedDay] = useState<FacturaType[]>(
+    []
+  );
+  const [devolucionesSelectedDay, setDevolucionesSelectedDay] = useState<
+    DevolucionesType[]
+  >([]);
+  const [cambiosSelectedDay, setCambiosSelectedDay] = useState<CambiosType[]>(
+    []
+  );
 
-  const totalNeto = facturasHoy.filter(f => f.tipo === 'contado' || f.tipo === 'crédito').reduce((acc, f) => acc + f.pagado, 0) - parseFloat(devolucionesHoy.toFixed(2));
+  async function getFacturasSelectDay(day: string) {
+    const fecha = new Date(day);
+    try {
+      const response = await fetch(
+        `${server.url}/facturas/resumen/${token}/fecha/${fecha}`,
+        {
+          headers: {
+            Authorization: `Basic ${server.credetials}`,
+          },
+        }
+      );
+      const data: {
+        facturas: FacturaType[];
+        devoluciones: DevolucionesType[];
+        cambios: CambiosType[];
+      } = await response.json();
+
+      const { facturas, devoluciones, cambios } = data;
+
+      setFacturasSelectedDay(facturas);
+      setDevolucionesSelectedDay(devoluciones);
+      setCambiosSelectedDay(cambios);
+    } catch {
+      setFacturasSelectedDay([]);
+      setDevolucionesSelectedDay([]);
+      setCambiosSelectedDay([]);
+    }
+  }
 
   return (
     <SafeAreaView
@@ -143,53 +141,19 @@ export const IndexPage = ({ logout }: { logout: () => Promise<void> }) => {
         <Text className="text-2xl my-4 text-slate-800 text-center font-bold">
           Resumen del día:
         </Text>
-        <InfoFacturasDia facturasHoy={facturasHoy} />
-        <View className="mx-auto mt-2 py-2 rounded-sm">
-          <Text className="text-center text-lg text-zinc-800">
-            Devolución: C$ {devolucionesHoy}
-          </Text>
-        </View>
-        <View className="mx-auto mb-4 py-2 rounded-sm">
-          <Text className="text-center text-lg text-zinc-800">
-            Abonos: C$ {facturasHoy.filter(f => f.tipo === 'crédito').reduce((acc, f) => acc + f.pagado, 0)}
-          </Text>
-        </View>
-        <View className="flex flex-row mb-4">
-          <Text className="font-medium bg-green-600 w-1/2 text-center text-xl text-white rounded-r-xl">
-            Total Neto:
-          </Text>
-          <Text className="font-medium text-green-600 w-1/2 -ml-2 text-center text-xl rounded-r-xl border-y border-green-600 border-r">
-            C${" "}
-            {totalNeto.toFixed(2)}
-          </Text>
-        </View>
 
-        <InfoCambios
-          cambios={() => {
-            return cambios.filter(
-              (c) =>
-                new Date(c.fecha).getDate() === new Date().getDate() &&
-                new Date(c.fecha).getMonth() === new Date().getMonth() &&
-                new Date(c.fecha).getFullYear() === new Date().getFullYear()
-            );
-          }}
+        <ResumenDia
+          facturas={facturas}
+          devoluciones={devoluciones}
+          cambios={cambios}
         />
-        <InfoProductos
-          facturas={() => {
-            return facturas.filter(
-              (f) =>
-                new Date(f.fecha).getDate() === new Date().getDate() &&
-                new Date(f.fecha).getMonth() === new Date().getMonth() &&
-                new Date(f.fecha).getFullYear() === new Date().getFullYear()
-            );
-          }}
-        />
+
         {/* Comparacíon del dia con el mismo dia de la semana anterior */}
-        <Text className="text-2xl my-4 text-center font-bold">
+        {/* <Text className="text-2xl my-4 text-center font-bold">
           Comparación:
         </Text>
 
-        <View className="mb-20">
+         <View className="mb-10">
           <LineChart
             data={{
               labels: ["", "Semana Pasada", "Hoy"],
@@ -198,7 +162,7 @@ export const IndexPage = ({ logout }: { logout: () => Promise<void> }) => {
                   data: [
                     0,
                     facturasSemanaPasada.reduce((acc, f) => acc + f.total, 0),
-                    facturasHoy.reduce((acc, f) => acc + f.total, 0),
+                    facturas.reduce((acc, f) => acc + f.total, 0),
                   ],
                 },
               ],
@@ -226,7 +190,45 @@ export const IndexPage = ({ logout }: { logout: () => Promise<void> }) => {
               marginVertical: 8,
             }}
           />
+        </View> */}
+
+        {/* RESUMEN DE OTRO DIA */}
+
+        <View className="mx-4 mt-8">
+          <Calendar
+            className="bg-slate-100"
+            onDayPress={(day: { dateString: string }) => {
+              setSelectedDay(day.dateString);
+              getFacturasSelectDay(day.dateString);
+            }}
+            enableSwipeMonths={true}
+            markedDates={{
+              ...(selectedDay
+                ? {
+                    [selectedDay]: {
+                      selected: true,
+                      marked: true,
+                      selectedColor: "green",
+                    },
+                  }
+                : {}),
+            }}
+          />
         </View>
+
+        {selectedDay && (
+          <>
+            <Text className="text-2xl text-slate-800 text-center font-bold mt-8">
+              Resumen del día: {selectedDay}
+            </Text>
+            <ResumenDia
+              facturas={facturasSelectedDay}
+              devoluciones={devolucionesSelectedDay}
+              cambios={cambiosSelectedDay}
+            />
+          </>
+        )}
+
         {/* MODAL OPCIONES */}
 
         <ModalOptionss visible={visible} setVisible={setVisible} />

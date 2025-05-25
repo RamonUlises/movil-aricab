@@ -1,26 +1,33 @@
 import { Modal, Pressable, ScrollView, Text, View } from "react-native";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { AntDesign } from "@expo/vector-icons";
 import { FacturaType } from "../types/facturas";
 
-export const InfoProductos = ({ facturas }: { facturas: () => FacturaType[] }) => {
+export const InfoProductos = ({ facturas }: { facturas: FacturaType[] }) => {
   const [visible, setVisible] = useState(false);
 
-  const [cantidadesProductos] = useState<{ [key: string]: number }>(() => {
-    const cantidades: { [key: string]: number } = {};
+  const [cantidadesProductos, setCantidadesProductos] = useState<{
+    [key: string]: number;
+  }>({});
 
-    facturas().map((fac) =>
-      fac.productos.map((p) => {
-        if (cantidades[p.nombre]) {
-          cantidades[p.nombre] += p.cantidad;
-        } else {
-          cantidades[p.nombre] = p.cantidad;
-        }
-      })
-    );
+  useEffect(() => {
+    setCantidadesProductos(() => {
+      const cantidades: { [key: string]: number } = {};
 
-    return cantidades;
-  });
+      facturas.map((fac) =>
+        fac.productos.map((p) => {
+          if (cantidades[p.nombre]) {
+            cantidades[p.nombre] += p.cantidad;
+          } else {
+            cantidades[p.nombre] = p.cantidad;
+          }
+        })
+      );
+
+      return cantidades;
+    });
+  }, [facturas]);
+
   return (
     <>
       <Pressable
@@ -61,15 +68,17 @@ export const InfoProductos = ({ facturas }: { facturas: () => FacturaType[] }) =
               alwaysBounceVertical={true}
               automaticallyAdjustContentInsets={true}
             >
-              {Object.entries(cantidadesProductos).map(([producto, cantidad]) => (
-                <View
-                  className="px-12 flex flex-row justify-between"
-                  key={producto}
-                >
-                  <Text className="text-lg text-zinc-800">{producto}</Text>
-                  <Text className="text-lg text-zinc-800">{cantidad}</Text>
-                </View>
-              ))}
+              {Object.entries(cantidadesProductos).map(
+                ([producto, cantidad]) => (
+                  <View
+                    className="px-12 flex flex-row justify-between"
+                    key={producto}
+                  >
+                    <Text className="text-lg text-zinc-800">{producto}</Text>
+                    <Text className="text-lg text-zinc-800">{cantidad}</Text>
+                  </View>
+                )
+              )}
             </ScrollView>
           </>
         )}

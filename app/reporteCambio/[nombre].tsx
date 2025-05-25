@@ -105,8 +105,6 @@ export default function ReporteCambio() {
       if (response) {
         router.push("(drawer)");
       }
-
-      setLoading(false);
     } catch {
       alert("Error al guardar reporte");
     }

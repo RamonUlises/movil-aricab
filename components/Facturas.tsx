@@ -97,6 +97,9 @@ export function Facturas({ facturas }: { facturas: FacturaType[] }) {
                     <Text className="text-sm font-medium text-zinc-800">
                       C$ {factura.total.toFixed(2)}
                     </Text>
+                    <Text className="text-[12px] font-medium text-zinc-600">
+                      C$ {factura.total - factura.pagado}
+                    </Text>
                   </View>
                 </Pressable>
               );

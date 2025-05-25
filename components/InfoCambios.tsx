@@ -1,26 +1,31 @@
 import { Modal, Pressable, ScrollView, Text, View } from "react-native";
 import { CambiosType } from "../types/cambios";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { AntDesign } from "@expo/vector-icons";
 
-export const InfoCambios = ({ cambios }: { cambios: () => CambiosType[] }) => {
+export const InfoCambios = ({ cambios }: { cambios: CambiosType[] }) => {
   const [visible, setVisible] = useState(false);
 
-  const [cantidadesCambios] = useState<{ [key: string]: number }>(() => {
-    const cantidades: { [key: string]: number } = {};
+  const [cantidadesCambios, setCantidadesCambios] = useState<{ [key: string]: number }>({});
 
-    cambios().map((can) =>
-      can.productos.map((p) => {
-        if (cantidades[p.nombre]) {
-          cantidades[p.nombre] += p.cantidad;
-        } else {
-          cantidades[p.nombre] = p.cantidad;
-        }
-      })
-    );
+  useEffect(() => {
+    setCantidadesCambios(() => {
+      const cantidades: { [key: string]: number } = {};
 
-    return cantidades;
-  });
+      cambios.map((can) =>
+        can.productos.map((p) => {
+          if (cantidades[p.nombre]) {
+            cantidades[p.nombre] += p.cantidad;
+          } else {
+            cantidades[p.nombre] = p.cantidad;
+          }
+        })
+      );
+
+      return cantidades;
+    });
+  }, [cambios]);
+
   return (
     <>
       <Pressable

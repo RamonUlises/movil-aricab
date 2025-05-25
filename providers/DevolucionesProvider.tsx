@@ -22,7 +22,15 @@ export default function DevolucionesProvider({
 
   async function fetchDevoluciones() {
     try {
-      const response = await fetch(`${server.url}/devoluciones/rutas/${token}`, {
+      const today = new Date();
+      const yyyy = today.getFullYear();
+      const mm = String(today.getMonth() + 1).padStart(2, "0"); // getMonth() es 0-indexado
+      const dd = String(today.getDate()).padStart(2, "0");
+
+      const formattedDate = `${yyyy}-${mm}-${dd}`;
+
+      const hoy = new Date(formattedDate);
+      const response = await fetch(`${server.url}/devoluciones/rutas/${token}/fecha/${hoy}`, {
         headers: {
           Authorization: `Basic ${server.credetials}`,
         },

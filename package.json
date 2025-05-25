@@ -1,6 +1,6 @@
 {
   "name": "facturation-movil-aricab",
-  "version": "1.2.0",
+  "version": "2.0.0",
   "main": "expo-router/entry",
   "scheme": "aricab-facturation",
   "scripts": {
@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@react-native-async-storage/async-storage": "1.23.1",
+    "@react-native-community/netinfo": "11.4.1",
     "@react-navigation/drawer": "^7.0.0",
     "expo": "~52.0.25",
     "expo-constants": "~17.0.3",
@@ -27,6 +28,7 @@
     "react-native": "0.76.6",
     "react-native-bluetooth-classic": "^1.73.0-rc.12",
     "react-native-bluetooth-escpos-printer": "github:RamonUlises/react-native-bluetooth-escpos-printer",
+    "react-native-calendars": "^1.1312.0",
     "react-native-chart-kit": "^6.12.0",
     "react-native-gesture-handler": "~2.20.2",
     "react-native-pager-view": "6.5.1",
@@ -38,8 +40,7 @@
     "react-native-svg": "^15.11.2",
     "react-native-tab-view": "^4.0.5",
     "react-native-uuid": "^2.0.3",
-    "socket.io-client": "^4.8.1",
-    "@react-native-community/netinfo": "11.4.1"
+    "socket.io-client": "^4.8.1"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",
