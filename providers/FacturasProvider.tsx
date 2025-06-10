@@ -7,6 +7,7 @@ import { useAuth } from "./AuthProvider";
 
 const FacturasContext = createContext({
   facturas: [] as FacturaType[],
+  facturasPasadas: [] as FacturaType[],
 });
 
 const socket = io(server.url);
@@ -17,6 +18,7 @@ export default function FacturasProvider({
   children: React.ReactNode;
 }) {
   const [facturas, setFacturas] = useState([] as FacturaType[]);
+  const [facturasPasadas, setFacturasPasadas] = useState([] as FacturaType[]);
   const [loading, setLoading] = useState(true);
   const { token } = useAuth();
 
@@ -41,9 +43,27 @@ export default function FacturasProvider({
       const data: FacturaType[] = await response.json();
 
       Array.isArray(data) ? setFacturas(data) : setFacturas([]);
+
+      // Facturas de la semana pasada
+      const semanaPasada = new Date(hoy);
+      semanaPasada.setDate(hoy.getDate() - 7);
+
+      const response2 = await fetch(
+        `${server.url}/facturas/rutas/${token}/fecha/${semanaPasada}`,
+        {
+          headers: {
+            Authorization: `Basic ${server.credetials}`,
+          },
+        }
+      );
+      const data2: FacturaType[] = await response2.json();
+
+      Array.isArray(data2) ? setFacturasPasadas(data2) : setFacturasPasadas([]);
+
       setLoading(false);
     } catch {
       setFacturas([]);
+      setFacturasPasadas([]);
       setLoading(false);
     }
   };
@@ -136,7 +156,7 @@ export default function FacturasProvider({
   }
 
   return (
-    <FacturasContext.Provider value={{ facturas }}>
+    <FacturasContext.Provider value={{ facturas, facturasPasadas }}>
       {children}
     </FacturasContext.Provider>
   );
