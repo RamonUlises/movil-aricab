@@ -5,6 +5,7 @@ import {
   Platform,
   Pressable,
   SafeAreaView,
+  ScrollView,
   Text,
   TextInput,
   useWindowDimensions,
@@ -23,6 +24,9 @@ import { FacturaType } from "../types/facturas";
 import { Calendar } from "react-native-calendars";
 import { useAuth } from "../providers/AuthProvider";
 import { server } from "../lib/server";
+import { AntDesign } from "@expo/vector-icons";
+import { useClientes } from "../providers/ClientesProvider";
+import { ClienteType } from "../types/clientes";
 
 interface Route {
   key: string;
@@ -30,6 +34,7 @@ interface Route {
 }
 
 interface State extends NavigationState<Route> {}
+type TypeFilter = "cliente" | "fecha" | "modal" | null;
 
 const renderScene = (facturas: FacturaType[]) =>
   SceneMap({
@@ -53,6 +58,7 @@ const renderScene = (facturas: FacturaType[]) =>
   });
 
 export function FacturasPage() {
+  const { clientes } = useClientes();
   const { facturas } = useFacturas();
   const { token } = useAuth();
 
@@ -60,6 +66,8 @@ export function FacturasPage() {
 
   const [facturasSelected, setFacturasSelected] =
     useState<FacturaType[]>(facturas);
+  const [facturasSearchSelected, setFacturasSearchSelected] = useState<FacturaType[]>(facturas);
+
   const [search, setSearch] = useState("");
 
   const [index, setIndex] = useState(0);
@@ -70,19 +78,24 @@ export function FacturasPage() {
   ]);
 
   const [selectedDay, setSelectedDay] = useState<string | null>(null);
-  const [filter, setFilter] = useState(false);
+  const [filter, setFilter] = useState<TypeFilter>(null);
   const [loading, setLoading] = useState(false);
+  const [filterSearch, setFilterSearch] = useState(false);
+
+  const [clientesSelected, setClientesSelected] = useState<ClienteType[]>([]);
+  const [clienteSearch, setClienteSearch] = useState("");
 
   const handleSearch = (text: string) => {
     setSearch(text);
     if (text === "") {
-      setFacturasSelected(facturas);
+      setFacturasSearchSelected(facturasSelected);
       return;
     }
-    const resulst = facturas.filter((fac) =>
+    const resulst = facturasSelected.filter((fac) =>
       fac.nombre.toLowerCase().includes(text.toLowerCase())
     );
-    setFacturasSelected(resulst);
+
+    setFacturasSearchSelected(resulst);
   };
 
   useEffect(() => {
@@ -91,7 +104,7 @@ export function FacturasPage() {
 
   async function getFacturasSelectDay(day: string) {
     setLoading(true);
-    setFilter(false);
+    setFilter(null);
     try {
       const fecha = new Date(day);
 
@@ -105,13 +118,71 @@ export function FacturasPage() {
       );
       const data: FacturaType[] = await response.json();
 
-      Array.isArray(data) ? setFacturasSelected(data) : setFacturasSelected([]);
+      if(Array.isArray(data)) {
+        setFacturasSelected(data);
+        setFacturasSearchSelected(data);
+      } else {
+        setFacturasSelected([]);
+        setFacturasSearchSelected([]);
+      }
+
       setLoading(false);
     } catch {
       setFacturasSelected([]);
+      setFacturasSearchSelected([]);
       setLoading(false);
     }
   }
+
+  const handleSearchCliente = (text: string) => {
+    setClienteSearch(text);
+    if (text === "") {
+      setClientesSelected([]);
+      return;
+    }
+
+    const filtered = [];
+    const lowerText = text.toLowerCase();
+
+    for (const cliente of clientes) {
+      if (cliente.nombres.toLowerCase().includes(lowerText)) {
+        filtered.push(cliente);
+        if (filtered.length === 20) break; // detener al llegar a 20
+      }
+    }
+
+    setClientesSelected(filtered);
+  };
+
+  async function getFacturaCliente (cliente: string) {
+    setLoading(true);
+    setFilter(null);
+    try{
+      const response = await fetch(
+        `${server.url}/facturas/clientes/${cliente}/facturador/${token}`,
+        {
+          headers: {
+            Authorization: `Basic ${server.credetials}`,
+          },
+        }
+      );
+      const data: FacturaType[] = await response.json();
+
+      if(Array.isArray(data)) {
+        setFacturasSelected(data);
+        setFacturasSearchSelected(data);
+      } else {
+        setFacturasSelected([]);
+        setFacturasSearchSelected([]);
+      }
+
+      setLoading(false);
+    } catch {
+      setLoading(false);
+      setFacturasSelected([]);
+      setFacturasSearchSelected([]);
+    }
+  };
 
   return (
     <SafeAreaView
@@ -129,7 +200,7 @@ export function FacturasPage() {
           className="text-black h-8 p-0 w-3/4 rounded-md border border-zinc-500 pl-4"
         />
         <Pressable
-          onPress={() => setFilter(true)}
+          onPress={() => setFilter("modal")}
           className="bg-green-600 m-2 items-center justify-center px-2 py-1 rounded"
         >
           <Text className="text-center text-lg font-semibold text-white">
@@ -137,12 +208,14 @@ export function FacturasPage() {
           </Text>
         </Pressable>
       </View>
-      {selectedDay && (
+      {filterSearch && (
         <View className="flex items-center justify-center">
           <Pressable
             onPress={() => {
               setSelectedDay(null);
               setFacturasSelected(facturas);
+              setFacturasSearchSelected(facturas);
+              setFilterSearch(false);
             }}
             className="bg-red-600 w-40 mx-auto m-2 items-center justify-center px-2 py-1 rounded"
           >
@@ -160,22 +233,58 @@ export function FacturasPage() {
       ) : (
         <TabView
           navigationState={{ index, routes }}
-          renderScene={renderScene(facturasSelected)}
+          renderScene={renderScene(facturasSearchSelected)}
           onIndexChange={setIndex}
           initialLayout={{ width: layout.width }}
           renderTabBar={renderTabBar}
         />
       )}
-      <Modal transparent={true} animationType="slide" visible={filter}>
-        <Pressable onPress={() => {
-          setFilter(false);
-        }} className="flex w-full h-full bg-black/50 justify-center items-center">
+      <Modal
+        transparent={true}
+        animationType="slide"
+        visible={filter === "modal"}
+      >
+        <Pressable
+          onPress={() => {
+            setFilter(null);
+          }}
+          className="flex w-full h-full bg-black/50 justify-center items-center"
+        >
+          <View className="mx-4 bg-white rounded">
+            <Pressable
+              onPress={() => setFilter("cliente")}
+              className="px-4 py-2"
+            >
+              <Text className="text-center text-lg font-semibold text-black">
+                Filtrar por cliente
+              </Text>
+            </Pressable>
+            <Pressable onPress={() => setFilter("fecha")} className="px-4 py-2">
+              <Text className="text-center text-lg font-semibold text-black">
+                Filtrar por fecha
+              </Text>
+            </Pressable>
+          </View>
+        </Pressable>
+      </Modal>
+      <Modal
+        transparent={true}
+        animationType="slide"
+        visible={filter === "fecha"}
+      >
+        <Pressable
+          onPress={() => {
+            setFilter(null);
+          }}
+          className="flex w-full h-full bg-black/50 justify-center items-center"
+        >
           <View className="mx-4 mt-8">
             <Calendar
               className="bg-slate-100"
               onDayPress={(day: { dateString: string }) => {
                 setSelectedDay(day.dateString);
                 getFacturasSelectDay(day.dateString);
+                setFilterSearch(true);
               }}
               enableSwipeMonths={true}
               markedDates={{
@@ -190,6 +299,61 @@ export function FacturasPage() {
                   : {}),
               }}
             />
+          </View>
+        </Pressable>
+      </Modal>
+      <Modal
+        transparent={true}
+        animationType="slide"
+        visible={filter === "cliente"}
+      >
+        <Pressable
+          onPress={() => {
+            setFilter(null);
+          }}
+          className="flex w-full h-full bg-black/50 justify-center items-center"
+        >
+          <View className="bg-white rounded p-4 w-[90%] h-[90%]">
+            <Pressable
+              onPress={() => setFilter(null)}
+              className="absolute top-2 right-2 w-8 z-30"
+            >
+              <AntDesign name="close" size={28} color="#27272a" />
+            </Pressable>
+            <Text className="text-center text-lg font-semibold text-black">
+              Seleccionar cliente
+            </Text>
+            <View className="mt-4">
+              <TextInput
+                value={clienteSearch}
+                onChangeText={handleSearchCliente}
+                placeholder="Buscar cliente"
+                placeholderTextColor="black"
+                className="text-black h-8 w-3/4 rounded-md border border-zinc-500 mx-auto pl-4"
+              />
+            </View>
+            <ScrollView
+              showsVerticalScrollIndicator={false}
+              alwaysBounceVertical={true}
+              automaticallyAdjustContentInsets={true}
+              className="mt-4"
+            >
+              {clientesSelected.length === 0 && (
+                <Text className="text-center text-xl font-semibold text-zinc-800 mt-6">
+                  No hay clientes
+                </Text>
+              )}
+              {clientesSelected.map((cliente) => (
+                <Pressable onPress={() => {
+                    getFacturaCliente(cliente.nombres)
+                    setFilterSearch(true);
+                  }} key={cliente.id} className="px-2 py-3 border-[0.5px] border-black">
+                  <Text className="text-base m-0 p-0 text-zinc-800">
+                    {cliente.nombres}
+                  </Text>
+                </Pressable>
+              ))}
+            </ScrollView>
           </View>
         </Pressable>
       </Modal>
