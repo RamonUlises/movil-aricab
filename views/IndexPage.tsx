@@ -26,21 +26,9 @@ import { CambiosType } from "../types/cambios";
 
 export const IndexPage = ({ logout }: { logout: () => Promise<void> }) => {
   const { usuario, token } = useAuth();
-  const { facturas } = useFacturas();
+  const { facturas, facturasPasadas } = useFacturas();
   const { cambios } = useCambios();
   const { devoluciones } = useDevoluciones();
-
-  /*   const [facturasSemanaPasada] = useState(() => {
-    const hoy = new Date();
-    const semanaPasada = new Date(hoy);
-    semanaPasada.setDate(hoy.getDate() - 8);
-    return facturas.filter(
-      (f) =>
-        new Date(f.fecha).getDate() === semanaPasada.getDate() &&
-        new Date(f.fecha).getMonth() === semanaPasada.getMonth() &&
-        new Date(f.fecha).getFullYear() === semanaPasada.getFullYear()
-    );
-  }); */
 
   const [confirmed, setConfirmed] = useState(false);
   const [visible, setVisible] = useState(false);
@@ -149,11 +137,11 @@ export const IndexPage = ({ logout }: { logout: () => Promise<void> }) => {
         />
 
         {/* Comparacíon del dia con el mismo dia de la semana anterior */}
-        {/* <Text className="text-2xl my-4 text-center font-bold">
+        <Text className="text-2xl my-4 text-center font-bold">
           Comparación:
         </Text>
 
-         <View className="mb-10">
+         <View className="mb-2">
           <LineChart
             data={{
               labels: ["", "Semana Pasada", "Hoy"],
@@ -161,7 +149,7 @@ export const IndexPage = ({ logout }: { logout: () => Promise<void> }) => {
                 {
                   data: [
                     0,
-                    facturasSemanaPasada.reduce((acc, f) => acc + f.total, 0),
+                    facturasPasadas.reduce((acc, f) => acc + f.total, 0),
                     facturas.reduce((acc, f) => acc + f.total, 0),
                   ],
                 },
@@ -190,7 +178,7 @@ export const IndexPage = ({ logout }: { logout: () => Promise<void> }) => {
               marginVertical: 8,
             }}
           />
-        </View> */}
+        </View> 
 
         {/* RESUMEN DE OTRO DIA */}
 
