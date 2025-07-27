@@ -66,6 +66,10 @@ export const VerFactura = ({
             ))}
           </ScrollView>
           <View className="flex flex-row justify-between items-center">
+            <Text className="font-semibold text-sm">Descuento</Text>
+            <Text className="font-semibold text-sm">C$ {factura.descuento || 0}</Text>
+          </View>
+          <View className="flex flex-row justify-between items-center">
             <Text className="font-semibold text-sm">Gran total</Text>
             <Text className="font-semibold text-sm">C$ {factura.total}</Text>
           </View>
