@@ -216,6 +216,11 @@ export default function FacturarId() {
                       handleChange(producto.id, text, producto.cantidad)
                     }
                     onBlur={(e) => updateCantidad(producto.id)}
+                    onFocus={(e) => {
+                      const input = e.target;
+                      
+                      input.setSelection(0, 500);
+                    }}
                   />
                   <Pressable
                     onPress={() => plusHandle(prod.id, producto.cantidad)}
