@@ -190,7 +190,7 @@ export function Impresoras({
         [BluetoothEscposPrinter.ALIGN.LEFT, BluetoothEscposPrinter.ALIGN.RIGHT], // Alineación de cada columna
         [
           "Pagado", // Contenido de la columna izquierda
-          `C$ ${pagadoo}`, // Contenido de la columna derecha
+          `C$ ${estado === "contado" ? total : pagadoo}`, // Contenido de la columna derecha
         ],
         {}
       );
@@ -210,7 +210,7 @@ export function Impresoras({
         [BluetoothEscposPrinter.ALIGN.LEFT, BluetoothEscposPrinter.ALIGN.RIGHT], // Alineación de cada columna
         [
           "Saldo", // Contenido de la columna izquierda
-          `C$ ${total - pagadoo}`, // Contenido de la columna derecha
+          `C$ ${estado === "contado" ? 0 : total - pagadoo}`, // Contenido de la columna derecha
         ],
         {}
       );
