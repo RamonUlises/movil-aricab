@@ -1,7 +1,7 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { server } from "../lib/server";
 import io from "socket.io-client";
-import { ActivityIndicator, View } from "react-native";
+import { ActivityIndicator, Text, View } from "react-native";
 import { useAuth } from "./AuthProvider";
 import { DevolucionesType, ProductosDevolucion } from "../types/devoluciones";
 
@@ -93,8 +93,9 @@ export default function DevolucionesProvider({
 
   if (loading) {
     return (
-      <View className="bg-slate-200 w-full h-full justify-center items-center">
+      <View className="bg-slate-200 w-full h-full justify-center items-center flex gap-2 flex-row">
         <ActivityIndicator size="large" />
+        <Text className="text-center text-md font-bold">Cargando devoluciones</Text>
       </View>
     );
   }

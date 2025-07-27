@@ -2,7 +2,7 @@ import { createContext, useContext, useEffect, useState } from "react";
 import { ClienteType } from "../types/clientes";
 import { server } from "../lib/server";
 import io from 'socket.io-client';
-import { ActivityIndicator, View } from "react-native";
+import { ActivityIndicator, Text, View } from "react-native";
 
 const socket = io(server.url);
 
@@ -82,8 +82,9 @@ export default function ClientesProvider({ children }: { children: React.ReactNo
 
   if(loading) {
     return (
-      <View className="bg-slate-200 w-full h-full justify-center items-center">
+      <View className="bg-slate-200 w-full h-full justify-center items-center flex gap-2 flex-row">
         <ActivityIndicator size="large" />
+        <Text className="text-center text-md font-bold">Cargando clientes</Text>
       </View>
     )
   }

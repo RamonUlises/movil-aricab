@@ -2,7 +2,7 @@ import io from "socket.io-client";
 import { server } from "../lib/server";
 import { createContext, useContext, useEffect, useState } from "react";
 import { ProductoType } from "../types/productos";
-import { ActivityIndicator, View } from "react-native";
+import { ActivityIndicator, Text, View } from "react-native";
 import { useAuth } from "./AuthProvider";
 import { RutasProductosType } from "../types/rutasProductos";
 
@@ -10,6 +10,7 @@ const socket = io(server.url);
 
 const ProductosContext = createContext({
   productos: [] as ProductoType[],
+  fetchProductos: async () => {},
 });
 
 export default function ProductosProvider({
@@ -83,14 +84,15 @@ export default function ProductosProvider({
 
   if (loading) {
     return (
-      <View className="bg-slate-200 w-full h-full justify-center items-center">
+      <View className="bg-slate-200 w-full h-full justify-center items-center flex flex-row gap-2">
         <ActivityIndicator size="large" />
+        <Text className="text-center text-md font-bold">Cargando productos</Text>
       </View>
     );
   }
 
   return (
-    <ProductosContext.Provider value={{ productos }}>
+    <ProductosContext.Provider value={{ productos, fetchProductos }}>
       {children}
     </ProductosContext.Provider>
   );

@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage/src";
-import { ActivityIndicator, View } from "react-native";
+import { ActivityIndicator, Text, View } from "react-native";
 import { server } from "../lib/server";
 import { Login } from "../components/Login";
 import { StatusBar } from "expo-status-bar";
@@ -109,8 +109,9 @@ export default function AuthProvider({
 
   if (loading) {
     return (
-      <View className="bg-slate-200 w-full h-full justify-center items-center">
+      <View className="bg-slate-200 w-full h-full justify-center items-center flex-row">
         <ActivityIndicator size="large" />
+        <Text className="text-center text-md font-bold">Cargando datos del facturador</Text>
       </View>
     );
   }

@@ -1,13 +1,14 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { FacturaType, ProductoFacturaType } from "../types/facturas";
-import { ActivityIndicator, View } from "react-native";
+import { ActivityIndicator, Text, View } from "react-native";
 import { server } from "../lib/server";
 import { io } from "socket.io-client";
 import { useAuth } from "./AuthProvider";
 
 const FacturasContext = createContext({
   facturas: [] as FacturaType[],
-  facturasPasadas: [] as FacturaType[],
+  montoPasado: 0,
+  fetchFacturas: async () => {},
 });
 
 const socket = io(server.url);
@@ -18,7 +19,7 @@ export default function FacturasProvider({
   children: React.ReactNode;
 }) {
   const [facturas, setFacturas] = useState([] as FacturaType[]);
-  const [facturasPasadas, setFacturasPasadas] = useState([] as FacturaType[]);
+  const [montoPasado, setMontoPasado] = useState(0);
   const [loading, setLoading] = useState(true);
   const { token } = useAuth();
 
@@ -49,21 +50,23 @@ export default function FacturasProvider({
       semanaPasada.setDate(hoy.getDate() - 7);
 
       const response2 = await fetch(
-        `${server.url}/facturas/rutas/${token}/fecha/${semanaPasada}`,
+        `${server.url}/facturas/rutas/${token}/fecha/${semanaPasada}/total`,
         {
           headers: {
             Authorization: `Basic ${server.credetials}`,
           },
         }
       );
-      const data2: FacturaType[] = await response2.json();
+      const data2 = await response2.json();
 
-      Array.isArray(data2) ? setFacturasPasadas(data2) : setFacturasPasadas([]);
+      if(response2.status === 200) {
+        setMontoPasado(parseFloat(data2.monto));
+      }
 
       setLoading(false);
     } catch {
       setFacturas([]);
-      setFacturasPasadas([]);
+      setMontoPasado(0);
       setLoading(false);
     }
   };
@@ -83,6 +86,7 @@ export default function FacturasProvider({
         tipo,
         pagado,
         facturador,
+        descuento
       }: {
         id: string;
         productos: ProductoFacturaType[];
@@ -90,12 +94,13 @@ export default function FacturasProvider({
         tipo: string;
         pagado: number;
         facturador: string;
+        descuento: number
       }) => {
         if (facturador !== token) return;
         setFacturas((prevFacturas) => {
           const updatedFacturas = prevFacturas.map((prevFactura) => {
             if (prevFactura.id === id) {
-              return { ...prevFactura, productos, total, tipo, pagado };
+              return { ...prevFactura, productos, total, tipo, pagado, descuento };
             }
 
             return prevFactura;
@@ -149,14 +154,15 @@ export default function FacturasProvider({
 
   if (loading) {
     return (
-      <View className="bg-slate-200 w-full h-full justify-center items-center">
+      <View className="bg-slate-200 w-full h-full justify-center items-center flex gap-2 flex-row">
         <ActivityIndicator size="large" />
+        <Text className="text-center text-md font-bold">Cargando facturas</Text>
       </View>
     );
   }
 
   return (
-    <FacturasContext.Provider value={{ facturas, facturasPasadas }}>
+    <FacturasContext.Provider value={{ facturas, montoPasado, fetchFacturas }}>
       {children}
     </FacturasContext.Provider>
   );
