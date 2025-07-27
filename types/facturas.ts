@@ -14,4 +14,5 @@ export interface FacturaType {
   tipo: string;
   total: number;
   pagado: number;
+  descuento: number
 }
