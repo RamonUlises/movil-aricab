@@ -18,6 +18,7 @@ import uuid from "react-native-uuid";
 import * as Sharing from "expo-sharing";
 import { Impresoras } from "../../components/Impresoras";
 import { useClientes } from "../../providers/ClientesProvider";
+import { useProductos } from "../../providers/ProductosProvider";
 
 export default function FacturarId() {
   const { id, prod, edit, idFacture, fechaFacture, cantidades } =
@@ -31,13 +32,14 @@ export default function FacturarId() {
     };
 
   const { clientes } = useClientes();
+  const { productos } = useProductos();
 
   const { token, admin } = useAuth();
   const fecha = fechaFacture ? new Date(fechaFacture) : new Date();
   const idFac = idFacture ? idFacture : uuid.v4();
   const router = useRouter();
 
-  const [productos, setProductos] = useState<PrdSlc[]>(
+  const [productosSele, setProductosSele] = useState<PrdSlc[]>(
     prod ? JSON.parse(prod) : []
   );
 
@@ -77,13 +79,13 @@ export default function FacturarId() {
 
     if (precio < 0) {
       // si el valor es menor a 0, dejarlo en 0
-      setProductos((prev) =>
+      setProductosSele((prev) =>
         prev.map((prod) => (prod.id === id ? { ...prod, precio: 0 } : prod))
       );
       return;
     }
 
-    setProductos((prev) =>
+    setProductosSele((prev) =>
       prev.map((prod) => (prod.id === id ? { ...prod, precio } : prod))
     );
   };
@@ -93,7 +95,7 @@ export default function FacturarId() {
       const pagadoo =
         estado === "crédito"
           ? pagado
-          : productos.reduce(
+          : productosSele.reduce(
               (acc, prod) => acc + prod.precio * prod.cantidad,
               0
             );
@@ -104,7 +106,7 @@ export default function FacturarId() {
         response = await crearFacturaServer({
           id: idFac,
           nombre: id,
-          productos,
+          productos: productosSele,
           tipo: estado,
           facturador: token,
           fecha,
@@ -113,7 +115,7 @@ export default function FacturarId() {
       } else {
         response = await editarFacturaServer({
           id: idFac,
-          productos,
+          productos: productosSele,
           tipo: estado,
           pagado: Math.ceil(pagadoo),
         });
@@ -132,7 +134,7 @@ export default function FacturarId() {
       const pagadoo =
         estado === "crédito"
           ? pagado
-          : productos.reduce(
+          : productosSele.reduce(
               (acc, prod) => acc + prod.precio * prod.cantidad,
               0
             );
@@ -143,7 +145,7 @@ export default function FacturarId() {
         response = await crearFacturaServer({
           id: idFac,
           nombre: id,
-          productos,
+          productos: productosSele,
           tipo: estado,
           facturador: token,
           fecha,
@@ -152,7 +154,7 @@ export default function FacturarId() {
       } else {
         response = await editarFacturaServer({
           id: idFac,
-          productos,
+          productos: productosSele,
           tipo: estado,
           pagado: Math.ceil(pagadoo),
         });
@@ -160,7 +162,7 @@ export default function FacturarId() {
 
       if (response) {
         const res = await createPdf(
-          productos,
+          productosSele,
           id,
           idFac,
           fecha,
@@ -192,7 +194,7 @@ export default function FacturarId() {
       const pagadoo =
         estado === "crédito"
           ? pagado
-          : productos.reduce(
+          : productosSele.reduce(
               (acc, prod) => acc + prod.precio * prod.cantidad,
               0
             );
@@ -203,7 +205,7 @@ export default function FacturarId() {
         response = await crearFacturaServer({
           id: idFac,
           nombre: id,
-          productos,
+          productos: productosSele,
           tipo: estado,
           facturador: token,
           fecha,
@@ -212,7 +214,7 @@ export default function FacturarId() {
       } else {
         response = await editarFacturaServer({
           id: idFac,
-          productos,
+          productos: productosSele,
           tipo: estado,
           pagado: Math.ceil(pagadoo),
         });
@@ -236,7 +238,7 @@ export default function FacturarId() {
             router.push({
               pathname: `facturarProd/${id}`,
               params: {
-                prod: JSON.stringify(productos),
+                prod: JSON.stringify(productosSele),
                 edit,
                 idFacture,
                 fechaFacture,
@@ -254,7 +256,7 @@ export default function FacturarId() {
       </Text>
       <View className="flex-1">
         <ScrollView showsVerticalScrollIndicator={false} className="flex-1">
-          {productos.map((prod, index) => {
+          {productosSele.map((prod, index) => {
             const tempValue = tempValues[prod.id];
             return (
               <View
@@ -297,10 +299,27 @@ export default function FacturarId() {
           <Text className="font-semibold text-white">Gran total</Text>
           <Text className="font-semibold text-white">
             C${" "}
-            {Math.ceil(productos.reduce(
+            {Math.ceil(productosSele.reduce(
               (acc, prod) => acc + prod.precio * prod.cantidad,
               0
             ))}
+          </Text>
+        </View>
+        <View
+          className={`flex flex-row justify-between items-center px-4 py-2 bg-green-500`}
+        >
+          <Text className="font-semibold text-white">Descuento:</Text>
+          <Text className="font-semibold text-white">
+            C${" "}
+            {Math.ceil(
+              productosSele.reduce((acc,prd) => {
+                const prod = productos.find((p) => p.id === prd.id);
+
+                if(!prod) return acc;
+
+                return acc + ((prod.precio - prd.precio ) * prd.cantidad);
+              }, 0)
+            )}
           </Text>
         </View>
         <View className="flex flex-row justify-between items-center px-4 py-2">
@@ -308,7 +327,7 @@ export default function FacturarId() {
             <Text className="text-[10px] font-semibold">Saldo: </Text>
             <Text className="font-semibold">
               C${" "}
-              {estado === 'crédito' ? Math.ceil(productos.reduce(
+              {estado === 'crédito' ? Math.ceil(productosSele.reduce(
                 (acc, prod) => acc + prod.precio * prod.cantidad,
                 0
               ) - pagado) : 0 }
@@ -348,7 +367,7 @@ export default function FacturarId() {
                 return;
               }
 
-              if(parseFloat(text) > Math.ceil(productos.reduce(
+              if(parseFloat(text) > Math.ceil(productosSele.reduce(
                 (acc, prod) => acc + prod.precio * prod.cantidad,
                 0
               ))) return;
@@ -417,7 +436,7 @@ export default function FacturarId() {
       </View>
       <Impresoras
         cliente={id}
-        productos={productos}
+        productos={productosSele}
         id={idFac}
         visible={visible}
         estado={estado}
