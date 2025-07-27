@@ -1,9 +1,20 @@
-import { Platform, SafeAreaView, ScrollView, Text, TextInput, View } from "react-native";
+import {
+  Platform,
+  Pressable,
+  SafeAreaView,
+  ScrollView,
+  Text,
+  TextInput,
+  View,
+} from "react-native";
 import { useProductos } from "../providers/ProductosProvider";
 import { useEffect, useState } from "react";
+import { Ionicons } from "@expo/vector-icons";
+import { useFacturas } from "../providers/FacturasProvider";
 
 export const ProductosPage = () => {
-  const { productos } = useProductos();
+  const { productos, fetchProductos } = useProductos();
+  const { fetchFacturas } = useFacturas();
 
   const [search, setSearch] = useState("");
   const [productosSelected, setProductosSelected] = useState(productos);
@@ -17,7 +28,7 @@ export const ProductosPage = () => {
     const result = productos.filter((prd) =>
       prd.nombre.toLowerCase().includes(text.toLowerCase())
     );
-    
+
     setProductosSelected(result);
   }
 
@@ -32,6 +43,15 @@ export const ProductosPage = () => {
       <Text className="text-center text-2xl py-4 font-semibold text-zinc-800">
         Productos
       </Text>
+      <Pressable
+        onPress={() => {
+          fetchFacturas();
+          fetchProductos();
+        }}
+        className="absolute bottom-4 right-4 z-20 rounded-full items-center justify-center bg-slate-300 p-3"
+      >
+        <Ionicons name="reload" size={28} color="#27272a" />
+      </Pressable>
       <TextInput
         value={search}
         onChangeText={handleSearch}

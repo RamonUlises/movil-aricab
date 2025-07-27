@@ -24,9 +24,10 @@ import { FacturaType } from "../types/facturas";
 import { Calendar } from "react-native-calendars";
 import { useAuth } from "../providers/AuthProvider";
 import { server } from "../lib/server";
-import { AntDesign } from "@expo/vector-icons";
+import { AntDesign, Ionicons } from "@expo/vector-icons";
 import { useClientes } from "../providers/ClientesProvider";
 import { ClienteType } from "../types/clientes";
+import { useProductos } from "../providers/ProductosProvider";
 
 interface Route {
   key: string;
@@ -59,14 +60,16 @@ const renderScene = (facturas: FacturaType[]) =>
 
 export function FacturasPage() {
   const { clientes } = useClientes();
-  const { facturas } = useFacturas();
+  const { facturas, fetchFacturas } = useFacturas();
+  const { fetchProductos } = useProductos();
   const { token } = useAuth();
 
   const layout = useWindowDimensions();
 
   const [facturasSelected, setFacturasSelected] =
     useState<FacturaType[]>(facturas);
-  const [facturasSearchSelected, setFacturasSearchSelected] = useState<FacturaType[]>(facturas);
+  const [facturasSearchSelected, setFacturasSearchSelected] =
+    useState<FacturaType[]>(facturas);
 
   const [search, setSearch] = useState("");
 
@@ -100,6 +103,11 @@ export function FacturasPage() {
 
   useEffect(() => {
     setFacturasSelected(facturas);
+    setFacturasSearchSelected(facturas);
+    setFilterSearch(false);
+    setFilter(null);
+    setSearch("");
+    setSelectedDay(null);
   }, [facturas]);
 
   async function getFacturasSelectDay(day: string) {
@@ -118,7 +126,7 @@ export function FacturasPage() {
       );
       const data: FacturaType[] = await response.json();
 
-      if(Array.isArray(data)) {
+      if (Array.isArray(data)) {
         setFacturasSelected(data);
         setFacturasSearchSelected(data);
       } else {
@@ -154,10 +162,10 @@ export function FacturasPage() {
     setClientesSelected(filtered);
   };
 
-  async function getFacturaCliente (cliente: string) {
+  async function getFacturaCliente(cliente: string) {
     setLoading(true);
     setFilter(null);
-    try{
+    try {
       const response = await fetch(
         `${server.url}/facturas/clientes/${cliente}/facturador/${token}`,
         {
@@ -168,7 +176,7 @@ export function FacturasPage() {
       );
       const data: FacturaType[] = await response.json();
 
-      if(Array.isArray(data)) {
+      if (Array.isArray(data)) {
         setFacturasSelected(data);
         setFacturasSearchSelected(data);
       } else {
@@ -182,7 +190,7 @@ export function FacturasPage() {
       setFacturasSelected([]);
       setFacturasSearchSelected([]);
     }
-  };
+  }
 
   return (
     <SafeAreaView
@@ -191,6 +199,14 @@ export function FacturasPage() {
       <Text className="text-center text-2xl py-4 font-semibold text-zinc-800">
         Facturas {selectedDay ? `del ${selectedDay}` : "hoy"}
       </Text>
+      <Pressable onPress={
+        () => {
+          fetchFacturas();
+          fetchProductos();         
+        }
+      } className="absolute bottom-4 right-4 z-20 rounded-full items-center justify-center bg-slate-300 p-3">
+        <Ionicons name="reload" size={28} color="#27272a" />
+      </Pressable>
       <View className="flex flex-row items-center justify-between px-3">
         <TextInput
           value={search}
@@ -344,10 +360,14 @@ export function FacturasPage() {
                 </Text>
               )}
               {clientesSelected.map((cliente) => (
-                <Pressable onPress={() => {
-                    getFacturaCliente(cliente.nombres)
+                <Pressable
+                  onPress={() => {
+                    getFacturaCliente(cliente.nombres);
                     setFilterSearch(true);
-                  }} key={cliente.id} className="px-2 py-3 border-[0.5px] border-black">
+                  }}
+                  key={cliente.id}
+                  className="px-2 py-3 border-[0.5px] border-black"
+                >
                   <Text className="text-base m-0 p-0 text-zinc-800">
                     {cliente.nombres}
                   </Text>
