@@ -26,7 +26,7 @@ import { CambiosType } from "../types/cambios";
 
 export const IndexPage = ({ logout }: { logout: () => Promise<void> }) => {
   const { usuario, token } = useAuth();
-  const { facturas, facturasPasadas } = useFacturas();
+  const { facturas, montoPasado } = useFacturas();
   const { cambios } = useCambios();
   const { devoluciones } = useDevoluciones();
 
@@ -149,7 +149,7 @@ export const IndexPage = ({ logout }: { logout: () => Promise<void> }) => {
                 {
                   data: [
                     0,
-                    facturasPasadas.reduce((acc, f) => acc + f.total, 0),
+                    montoPasado,
                     facturas.reduce((acc, f) => acc + f.total, 0),
                   ],
                 },
