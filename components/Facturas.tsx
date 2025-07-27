@@ -16,7 +16,7 @@ export type modalVisible = null | "ver" | "editar" | "abonar" | "menu";
 export function Facturas({ facturas }: { facturas: FacturaType[] }) {
   const router = useRouter();
   const { clientes } = useClientes();
-  
+
   // Agrupar facturas por fecha y hora (sin segundos) para mostrarlas en la lista, ordenar
   const facturasPorFecha = facturas.reduce(
     (acc: Record<string, FacturaType[]>, factura) => {
@@ -74,7 +74,7 @@ export function Facturas({ facturas }: { facturas: FacturaType[] }) {
 
               return (
                 <Pressable
-                  className="flex flex-row justify-between items-center px-4 py-4 mx-1 border-y-[0.5px]"
+                  className="flex flex-row justify-between items-center px-4 py-4 mx-1 border-y-[0.5px] relative"
                   key={factura.id}
                   onPress={() => {
                     setSelectedFactura(factura);
@@ -82,6 +82,11 @@ export function Facturas({ facturas }: { facturas: FacturaType[] }) {
                     setIndex(index);
                   }}
                 >
+                  {factura.descuento && factura.descuento !== 0 ? (
+                    <View className="absolute top-1 left-0 flex flex-row justify-center items-center bg-green-600 px-2 rounded-r -ml-2">
+                      <Text className="text-[10px] text-white">Descuento</Text>
+                    </View>
+                  ) : null}
                   <View>
                     <Text className="text-base font-medium m-0 p-0 text-zinc-800">
                       {factura.nombre}
@@ -116,9 +121,7 @@ export function Facturas({ facturas }: { facturas: FacturaType[] }) {
                   setSelectedFactura({} as FacturaType);
                 }}
               />
-              <View
-                className="w-40 bg-white overflow-hidden z-[60] mx-auto my-auto"
-              >
+              <View className="w-40 bg-white overflow-hidden z-[60] mx-auto my-auto">
                 <Pressable
                   className="py-4 border-b-[0.8px] flex flex-row pl-2 gap-4"
                   onPress={() => {
@@ -219,7 +222,6 @@ export function Facturas({ facturas }: { facturas: FacturaType[] }) {
                   <Text>Abonar a factura</Text>
                 </Pressable>
               </View>
-              
             </Modal>
           </View>
         ))
