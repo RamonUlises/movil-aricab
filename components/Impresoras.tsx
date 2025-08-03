@@ -56,7 +56,6 @@ export function Impresoras({
         printToPrinter();
       },
       (err: string) => {
-        console.log("Error al conectar", err);
         Alert.alert("Reintente nuevamente", "Error al conectarse");
       }
     ).finally(() => setLoading(false));
@@ -238,10 +237,9 @@ export function Impresoras({
       } else {
         setVisible && setVisible(false);
       }
-    } catch (error) {
+    } catch {
       setSelect("");
       Alert.alert("Reintente nuevamente", "Error al conectarse");
-      console.log(error);
     }
   };
 

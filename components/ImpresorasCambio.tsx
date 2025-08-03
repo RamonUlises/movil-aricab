@@ -52,7 +52,6 @@ export const ImpresorasCambio = ({
         printToPrinter();
       },
       (err: string) => {
-        console.log("Error al conectar", err);
         Alert.alert("Reintente nuevamente", "Error al conectarse");
       }
     ).finally(() => setLoading(false));
@@ -169,10 +168,9 @@ export const ImpresorasCambio = ({
       } else {
         router.push("(drawer)");
       }
-    } catch (error) {
+    } catch {
       setSelect("");
       Alert.alert("Reintente nuevamente", "Error al conectarse");
-      console.log(error);
     }
   }
   return (

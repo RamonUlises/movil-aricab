@@ -208,10 +208,9 @@ export const ImpresorasDevolucion = ({
         router.push("(drawer)");
       }
 
-    } catch (error) {
+    } catch {
       setSelect("");
       Alert.alert("Reintente nuevamente", "Error al conectarse");
-      console.log(error);
     }
   }
   return (
