@@ -43,15 +43,15 @@ export async function editarFacturaServer({ id, productos, tipo, pagado }: { id:
   }
 }
 
-export async function abonarFacturaServer({ id, abono }: { id: string, abono: number }) {
+export async function abonarFacturaServer({ id, abono, fecha, idRecuperacion }: { id: string, abono: number, fecha: string, idRecuperacion: string }) {
   try {
-    const response = await fetch(`${server.url}/facturas/abonar/${id}`, {
+    const response = await fetch(`${server.url}/facturas/abonar/facturador/${id}`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
         'Authorization': `Basic ${server.credetials}`
       },
-      body: JSON.stringify({ abono })
+      body: JSON.stringify({ abono, fecha, idRecuperacion })
     });
 
     if (response.status === 200) {

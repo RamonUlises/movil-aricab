@@ -23,12 +23,15 @@ import { FacturaType } from "../types/facturas";
 import { server } from "../lib/server";
 import { DevolucionesType } from "../types/devoluciones";
 import { CambiosType } from "../types/cambios";
+import { useRecuperacion } from "../providers/RecuperacionProvider";
+import { RecuperacionType } from "../types/recuperacion";
 
 export const IndexPage = ({ logout }: { logout: () => Promise<void> }) => {
   const { usuario, token } = useAuth();
   const { facturas, montoPasado } = useFacturas();
   const { cambios } = useCambios();
   const { devoluciones } = useDevoluciones();
+  const { recuperacion } = useRecuperacion();
 
   const [confirmed, setConfirmed] = useState(false);
   const [visible, setVisible] = useState(false);
@@ -68,6 +71,7 @@ export const IndexPage = ({ logout }: { logout: () => Promise<void> }) => {
   const [cambiosSelectedDay, setCambiosSelectedDay] = useState<CambiosType[]>(
     []
   );
+  const [recuperacionSelectedDay, setRecuperacionSelectedDay] = useState<RecuperacionType[]>([]);
 
   async function getFacturasSelectDay(day: string) {
     const fecha = new Date(day);
@@ -84,13 +88,15 @@ export const IndexPage = ({ logout }: { logout: () => Promise<void> }) => {
         facturas: FacturaType[];
         devoluciones: DevolucionesType[];
         cambios: CambiosType[];
+        recuperacion: RecuperacionType[];
       } = await response.json();
 
-      const { facturas, devoluciones, cambios } = data;
+      const { facturas, devoluciones, cambios, recuperacion } = data;
 
       setFacturasSelectedDay(facturas);
       setDevolucionesSelectedDay(devoluciones);
       setCambiosSelectedDay(cambios);
+      setRecuperacionSelectedDay(recuperacion);
     } catch {
       setFacturasSelectedDay([]);
       setDevolucionesSelectedDay([]);
@@ -134,6 +140,7 @@ export const IndexPage = ({ logout }: { logout: () => Promise<void> }) => {
           facturas={facturas}
           devoluciones={devoluciones}
           cambios={cambios}
+          recuperacion={recuperacion}
         />
 
         {/* Comparacíon del dia con el mismo dia de la semana anterior */}
@@ -213,6 +220,7 @@ export const IndexPage = ({ logout }: { logout: () => Promise<void> }) => {
               facturas={facturasSelectedDay}
               devoluciones={devolucionesSelectedDay}
               cambios={cambiosSelectedDay}
+              recuperacion={recuperacionSelectedDay}
             />
           </>
         )}

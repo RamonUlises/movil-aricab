@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { ActivityIndicator, Modal, Pressable, Text, TextInput, View } from "react-native";
 import { modalVisible } from "./Facturas";
 import { abonarFacturaServer } from "../lib/facturas";
+import uuid from "react-native-uuid";
 
 export const AbonarFactura = ({
   cliente,
@@ -23,7 +24,10 @@ export const AbonarFactura = ({
     if (abono === 0) return;
     setLoading(true);
     try {
-      await abonarFacturaServer({ id, abono });
+      const idRecuperacion = uuid.v4();
+      const fecha = new Date();
+
+      await abonarFacturaServer({ id, idRecuperacion, abono, fecha: fecha.toString() });
     } finally {
       setModalVisible(null);
     }

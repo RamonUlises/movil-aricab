@@ -5,15 +5,18 @@ import { InfoProductos } from "./InfoProductos";
 import { FacturaType } from "../types/facturas";
 import { DevolucionesType } from "../types/devoluciones";
 import { CambiosType } from "../types/cambios";
+import { RecuperacionType } from "../types/recuperacion";
 
 export function ResumenDia({
   facturas,
   devoluciones,
   cambios,
+  recuperacion,
 }: {
   facturas: FacturaType[];
   devoluciones: DevolucionesType[];
   cambios: CambiosType[];
+  recuperacion: RecuperacionType[];
 }) {
   const devolucionesTotal = devoluciones.reduce((acc, d) => acc + d.total, 0);
 
@@ -45,6 +48,14 @@ export function ResumenDia({
         </Text>
         <Text className="font-medium text-green-600 w-1/2 -ml-2 text-center text-xl rounded-r-xl border-y border-green-600 border-r">
           C$ {totalNeto.toFixed(2)}
+        </Text>
+      </View>
+       <View className="flex flex-row mb-4">
+        <Text className="font-medium bg-green-600 w-1/2 text-center text-xl text-white rounded-r-xl">
+          Recuperación:
+        </Text>
+        <Text className="font-medium text-green-600 w-1/2 -ml-2 text-center text-xl rounded-r-xl border-y border-green-600 border-r">
+          C$ {recuperacion.reduce((acc, r) => acc + r.recuperacion, 0)}
         </Text>
       </View>
 
