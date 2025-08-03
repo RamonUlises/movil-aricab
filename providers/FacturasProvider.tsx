@@ -59,7 +59,7 @@ export default function FacturasProvider({
       );
       const data2 = await response2.json();
 
-      if(response2.status === 200) {
+      if (response2.status === 200) {
         setMontoPasado(parseFloat(data2.monto));
       }
 
@@ -86,7 +86,7 @@ export default function FacturasProvider({
         tipo,
         pagado,
         facturador,
-        descuento
+        descuento,
       }: {
         id: string;
         productos: ProductoFacturaType[];
@@ -94,13 +94,20 @@ export default function FacturasProvider({
         tipo: string;
         pagado: number;
         facturador: string;
-        descuento: number
+        descuento: number;
       }) => {
         if (facturador !== token) return;
         setFacturas((prevFacturas) => {
           const updatedFacturas = prevFacturas.map((prevFactura) => {
             if (prevFactura.id === id) {
-              return { ...prevFactura, productos, total, tipo, pagado, descuento };
+              return {
+                ...prevFactura,
+                productos,
+                total,
+                tipo,
+                pagado,
+                descuento,
+              };
             }
 
             return prevFactura;
@@ -140,6 +147,23 @@ export default function FacturasProvider({
       await fetchFacturas();
     });
 
+    socket.on(
+      "updateNameFac",
+      ({ id, nombre }: { id: string; nombre: string }) => {
+        setFacturas((prevFacturas) => {
+          const updatedFacturas = prevFacturas.map((prevFactura) => {
+            if (prevFactura.id === id) {
+              return { ...prevFactura, nombre };
+            }
+
+            return prevFactura;
+          });
+
+          return updatedFacturas;
+        });
+      }
+    );
+
     fetchFacturas();
 
     return () => {
@@ -148,6 +172,7 @@ export default function FacturasProvider({
       socket.off("facturaDelete");
       socket.off("facturaAbonar");
       socket.off("updateName");
+      socket.off("updateNameFac");
     };
   }, []);
 
